@@ -1,7 +1,7 @@
 // ==UserScript==
 // @author          tumpio
 // @name            Endless Google
-// @description     Load more results automatically and endlesly.
+// @description     Load more results automatically and endlessly.
 // @namespace       userscripts.org/users/439657
 // @homepage        http://userscripts.org/scripts/show/410564
 // @icon            http://s3.amazonaws.com/uso_ss/icon/410564/large.png
@@ -40,7 +40,6 @@ if (window.top !== window.self) // NOTE: Do not run on iframes
 
 // NOTE: Options
 var request_pct = 0.75; // percentage of page height to request next page, must be between 0-1
-var request_height = document.body.scrollHeight * (1 - request_pct);
 var event_type = "scroll"; // or "wheel"
 
 var main = document.getElementById("main");
@@ -66,20 +65,23 @@ function requestNextPage(link) {
             next_link = holder.querySelector("#pnnext").href;
 
             var next_col = document.createElement("div");
-            next_col.className = "gar_col";
+            next_col.className = "EG_col";
             next_col.appendChild(holder.querySelector("#center_col"));
 
             var rel_search = next_col.querySelector("#extrares");
             var rel_images = next_col.querySelector("#imagebox_bigimages");
+            var rel_ads = next_col.querySelector("#tads");
             if (rel_search)
                 rel_search.style.display = "none"; // NOTE: Hide repeating "related searches"
             if (rel_images)
                 rel_images.style.display = "none"; // NOTE: Hide related images, that are broken (see fixme on line:25)
+            if (rel_ads)
+                rel_ads.style.display = "none"; // NOTE: Hide repeating "search results ad"
 
             cols.push(next_col);
             console.log("Page no: " + cols.length);
 
-            if (!rcnt) // NOTE: late insertation of element on google instant
+            if (!rcnt || cols.length === 1) // NOTE: needs to be rechecked on a state reset too, and late insertation of element on google instant
                 rcnt = document.getElementById("rcnt");
 
             rcnt.appendChild(next_col);
@@ -91,14 +93,16 @@ function requestNextPage(link) {
 function scroll(e) {
 
     var y = window.scrollY;
-    if (scroll_events == 0) old_scrollY = y;
+    if (scroll_events === 0) old_scrollY = y;
     var delta = e.deltaY || y - old_scrollY; // NOTE: e.deltaY for "wheel" event
 
-    if (delta > 0 && (window.innerHeight + y) >= document.body.clientHeight - request_height) { // NOTE: using .clientHeight instead of .offsetheight
+    if (delta > 0 && (window.innerHeight + y) >= document.body.clientHeight) { // NOTE: using .clientHeight instead of .offsetheight
         console.log("scroll end");
+        window.removeEventListener(event_type, scroll, false);
 
         try {
             requestNextPage(next_link || document.getElementById("pnnext").href);
+            window.addEventListener(event_type, scroll, false);
         } catch (err) {
             console.error(err.name + ": " + err.message);
             window.removeEventListener(event_type, scroll, false);
@@ -112,7 +116,7 @@ function scroll(e) {
 // NOTE: Resets the script state on a new search
 function reset() {
     console.log("RESET");
-    window.removeEventListener(event_type, scroll, false);
+    input.removeEventListener("blur", reset, false);
     for (var i = 0; i < cols.length; i++)
         rcnt.removeChild(cols[i]);
     cols = [];
@@ -120,6 +124,7 @@ function reset() {
     old_scrollY = 0;
     scroll_events = 0;
     window.addEventListener(event_type, scroll, false);
+    input.addEventListener("input", onNewSearch, false);
 }
 
 function onNewSearch() {
