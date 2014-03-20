@@ -13,7 +13,7 @@
 // @grant           GM_getValue
 // @grant           GM_setValue
 // @grant           GM_xmlhttpRequest
-// @version         2.0.0
+// @version         2.0.1
 // @author          tumpio
 // ==/UserScript==
 
@@ -343,11 +343,11 @@ function handleDrop(e) {
 }
 
 // START
-var header = document.getElementById("header");
-if (header) {
-    if (window.location.href.indexOf("http://mycroftproject.com/") !== -1) {
-        mycroft.addLinks(document.getElementById("plugins"));
-    } else {
+if (window.location.href.indexOf("http://mycroftproject.com/") !== -1) {
+    mycroft.addLinks(document.getElementById("plugins"));
+} else {
+    var header = document.getElementById("header");
+    if (header) {
         ddg_e.append(header);
         options.create(document.getElementById("header_button_menu"));
         onColorChange(header, document.getElementById("kj"));

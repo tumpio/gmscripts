@@ -11,16 +11,19 @@
 // @include         https://www.google.*
 // @include         https://encrypted.google.*
 // @grant           GM_xmlhttpRequest
-// @version         0.0.1
+// @version         0.0.2
 // ==/UserScript==
 
 // TODO: on page refresh, what should be done?
 // ^ possibilites: 1: return to the original position by reloading all previous pages again, what if +100 pages opened! (default now)
 //                 2: load only the first page (prevent restoring the scroll position) (this if 3. is not acceptable)
 //                     http://stackoverflow.com/questions/10742422/prevent-browser-scroll-on-html5-history-popstate
-//                 3: load only the last scrolled page (on refresh, load last requested page) (could be a good default, would be great if scrolling up suppoted too)
+//                 3: load only the last scrolled page (on refresh, load last requested page) (could be a good default, would be great if scrolling up was suppoted too)
 //                     beforeunload -> store last requested page with GM_setVariable() and reload it instead
 // ^ user configurable would be the best
+// TODO: percentage of page height to request next page
+// TODO: support run @ document-start, needed?
+// TODO: onerror, onabort: show to user "page loading failed", button to retry
 
 // FIXME: bug: Suggested images don't show up on new requested pages
 // case: https://www.google.fi/webhp?tab=ww&ei=e0UjU9ynEKqkyAO46YD4DQ&ved=0CBEQ1S4#q=tetsaus
@@ -49,17 +52,15 @@ var old_scrollY = 0;
 var scroll_events = 0;
 var next_link = null;
 var cols = [];
+var request_offsetHeight = 0;
 
 function requestNextPage(link) {
-
     console.log("request next");
     console.log(link);
-
     GM_xmlhttpRequest({
         method: "GET",
         url: link,
         onload: function (response) {
-
             var holder = document.createElement("div");
             holder.innerHTML = response.responseText;
             next_link = holder.querySelector("#pnnext").href;
@@ -80,11 +81,12 @@ function requestNextPage(link) {
 
             cols.push(next_col);
             console.log("Page no: " + cols.length);
+            next_col.id = next_col.className + "_" + (cols.length - 1); // NOTE: add unique id for every new col
 
             if (!rcnt || cols.length === 1) // NOTE: needs to be rechecked on a state reset too, and late insertation of element on google instant
                 rcnt = document.getElementById("rcnt");
-
             rcnt.appendChild(next_col);
+            window.addEventListener(event_type, scroll, false);
         }
     });
 
@@ -93,19 +95,16 @@ function requestNextPage(link) {
 function scroll(e) {
 
     var y = window.scrollY;
-    if (scroll_events === 0) old_scrollY = y;
+    // if (scroll_events === 0) old_scrollY = y; // stops only if scroll position was on 2. page
     var delta = e.deltaY || y - old_scrollY; // NOTE: e.deltaY for "wheel" event
-
-    if (delta > 0 && (window.innerHeight + y) >= document.body.clientHeight) { // NOTE: using .clientHeight instead of .offsetheight
+    if (delta > 0 && (window.innerHeight + y) >= (document.body.clientHeight - 100)) { // NOTE: using .clientHeight instead of .offsetheight
         console.log("scroll end");
         window.removeEventListener(event_type, scroll, false);
 
         try {
             requestNextPage(next_link || document.getElementById("pnnext").href);
-            window.addEventListener(event_type, scroll, false);
         } catch (err) {
             console.error(err.name + ": " + err.message);
-            window.removeEventListener(event_type, scroll, false);
             // NOTE: recovery unnecessary, input event handles it with reset on new search
         }
     }
