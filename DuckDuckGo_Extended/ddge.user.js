@@ -13,7 +13,7 @@
 // @grant           GM_getValue
 // @grant           GM_setValue
 // @grant           GM_xmlhttpRequest
-// @version         2.0.1
+// @version         2.0.2
 // @author          tumpio
 // ==/UserScript==
 
@@ -22,18 +22,18 @@ var ddg_e = {
     list: document.createElement("ol"),
     engines: [],
 
-    default: "Google==http://www.google.com/search?q={searchTerms}\
-;;Images==http://www.bing.com/images/search?q={searchTerms}&FORM=BIFD\
-;;Wiki==http://en.wikipedia.org/w/index.php?title=Special%3ASearch&profile=default&search={searchTerms}\
-;;Maps==http://maps.google.com/maps?q={searchTerms}\
-;;YouTube==http://www.youtube.com/results?search_query={searchTerms}&aq=f\
+    default: "Google==https://encrypted.google.com/search?q={searchTerms}\
+;;Images==http://www.picsearch.com/index.cgi?q={searchTerms}\
+;;Wiki==https://en.wikipedia.org/w/index.php?title=Special%3ASearch&profile=default&search={searchTerms}\
+;;Maps==https://maps.google.com/maps?q={searchTerms}\
+;;YouTube==https://www.youtube.com/results?search_query={searchTerms}&aq=f\
 ;;IMDb==http://www.imdb.com/find?s=all&amp;q={searchTerms}\
 ;;Music==http://www.musicsmasher.net/#{searchTerms}\
-;;Facebook==http://www.facebook.com/search.php?q={searchTerms}\
+;;Facebook==https://www.facebook.com/search.php?q={searchTerms}\
 ;;Google+==https://plus.google.com/s/{searchTerms}\
 ;;twitter==https://twitter.com/#!/search/realtime/{searchTerms}\
-;;Amazon==http://www.amazon.com/gp/search?ie=UTF8&keywords={searchTerms}\
-;;Torrents==http://scrapetorrent.com/Search/index.php?search={searchTerms}&sort=seed&fz=&zs=&cat=\
+;;Amazon==https://www.amazon.com/gp/search?ie=UTF8&keywords={searchTerms}\
+;;Torrents==https://torrentproject.com/?t={searchTerms}\
 ;;filesTube==http://www.filestube.com/search.html?q={searchTerms}\
 ;;Translate==http://translate.google.com/translate_t#auto|en|{searchTerms}",
 
@@ -71,8 +71,9 @@ body #header_wrapper #header #header_content_wrapper #header_content #header_but
     newList: function() {
         var l = "";
         var e = this.get();
+        var t = escape(document.getElementById("search_form_input").value);
         for (var i = 0; i < e.length; i++)
-            l += '<li draggable="true" value=' + (i + 1) + '"><a data-engine="' + e[i][1] + '"href="#' + e[i][1] + '">' + e[i][0] + "</a></li>";
+            l += '<li draggable="true" value=' + (i + 1) + '"><a data-engine="' + e[i][1] + '"href="' + e[i][1].replace("{searchTerms}", t) + '">' + e[i][0] + "</a></li>";
         this.list.innerHTML = l;
         this.engines = this.list.getElementsByTagName("li");
     },
@@ -351,6 +352,5 @@ if (window.location.href.indexOf("http://mycroftproject.com/") !== -1) {
         ddg_e.append(header);
         options.create(document.getElementById("header_button_menu"));
         onColorChange(header, document.getElementById("kj"));
-        onHashChange();
     }
 }
