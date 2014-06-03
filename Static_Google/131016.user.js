@@ -1,12 +1,12 @@
 // ==UserScript==
-// @author          tumpio
 // @name            Static Google
 // @description     Google search interface always visible on screen, and some additional changes for more compact layout.
-// @namespace       userscripts.org/users/439657
+// @author          tumpio
+// @namespace       tumpio@sci.fi
 // @homepage        http://userscripts.org/scripts/show/131016
-// @icon            http://s3.amazonaws.com/uso_ss/icon/131016/large.png
-// @updateURL       https://userscripts.org/scripts/source/131016.meta.js
-// @downloadURL     https://userscripts.org/scripts/source/131016.user.js
+// @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/Static_Google/large.png
+// @updateURL       https://github.com/tumpio/gmscripts/raw/master/Static_Google/131016.user.js
+// @downloadURL     https://github.com/tumpio/gmscripts/raw/master/Static_Google/131016.user.js
 // @resource        css http://userstyles.org/styles/99153.css
 // @include         http://www.google.*
 // @include         https://www.google.*
