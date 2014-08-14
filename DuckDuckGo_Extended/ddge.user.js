@@ -7,7 +7,7 @@
 // @updateURL       https://userscripts.org/scripts/source/129505.meta.js
 // @downloadURL     https://userscripts.org/scripts/source/129505.user.js
 // @match           *://duckduckgo.com/*
-// @exclude         *://duckduckgo.com/post2.html 
+// @exclude         *://duckduckgo.com/post2.html
 // @match           http://mycroftproject.com/*
 // @grant           GM_addStyle
 // @grant           GM_getValue
@@ -42,17 +42,16 @@ var ddg_e = {
 #ddg_extented li { display:inline; list-style:none; position:relative; left:50%; box-shadow:0 2px 5px 0 #888; margin:0; padding:0; background:#b60002 }\
 #ddg_extented li:first-child { border-bottom-left-radius: 10px }\
 #ddg_extented li:last-child { border-bottom-right-radius: 10px }\
-#ddg_extented li a:link,li a:visited { text-decoration:none; color:#fff; font-size:.7em; font-weight:700; padding:0 9px }\
+#ddg_extented li a:link,li a:visited { text-decoration:none; color:#fff; font-size:1em; font-weight:700; padding:0 9px }\
 #ddg_extented li a:hover { color:#91C5EE }\
 #ddg_extented li:hover { box-shadow:0 3px 3px 0 #888 }\
 #ddg_extented li.disabled a {pointer-events: none }\
 body #header_wrapper #header #header_content_wrapper #header_content #header_button_wrapper #header_button #header_button_menu_wrapper #header_button_menu li.disabled {display: none!important;}\
-#ddg_e_save a { background: #88FF61!important }\
-#ddg_e_cancel a { background: #FF8861!important }",
+#ddg_e_save a { color: #6CBD6A!important }\
+#ddg_e_cancel a { color: #FF8861!important }",
 
-    get: function() {
-        var e = GM_getValue("engines", this.
-            default).split(";;");
+    get: function () {
+        var e = GM_getValue("engines", this.default).split(";;");
         var a = [];
         for (var i = 0; i < e.length; i++)
             a.push(e[i].split("=="));
@@ -60,7 +59,7 @@ body #header_wrapper #header #header_content_wrapper #header_content #header_but
         return a;
     },
 
-    set: function() {
+    set: function () {
         var e = "";
         for (var i = 0; i < this.engines.length; i++) {
             e += ";;" + this.engines[i].textContent + "==" + this.engines[i].firstChild.getAttribute("data-engine");
@@ -68,7 +67,7 @@ body #header_wrapper #header #header_content_wrapper #header_content #header_but
         GM_setValue("engines", e.substr(2));
     },
 
-    newList: function() {
+    newList: function () {
         var l = "";
         var e = this.get();
         var t = escape(document.getElementById("search_form_input").value);
@@ -78,10 +77,10 @@ body #header_wrapper #header #header_content_wrapper #header_content #header_but
         this.engines = this.list.getElementsByTagName("li");
     },
 
-    append: function(h) {
+    append: function (h) {
         var e = document.createElement("div");
-        var b = h.style.background;
-        if (b !== "")
+        var b = window.getComputedStyle(h).backgroundColor;
+        if (b.indexOf("255, 255, 255") < 0 && b.toLowerCase.indexOf("#ffffff") < 0)
             this.style += "#ddg_extented li { background:" + b + "!important }";
         GM_addStyle(this.style);
         e.setAttribute("id", "ddg_extented");
@@ -93,46 +92,40 @@ body #header_wrapper #header #header_content_wrapper #header_content #header_but
 
 var options = {
 
-    size: 7,
     list: [],
     strings: [
-        ["Find new", "Find and add new search engines from MyCroft"],
-        ["Reorder", "Drag and drop search engines"],
-        ["Rename", "Click to rename search engines"],
-        ["Remove", "Click to remove search engines"],
-        ["Restore all", "Restores all default search engines"],
-        ["Save", "Saves modified search engines"],
-        ["Cancel", "Cancels all recent modifications"]
+        ["Find new", "Find and add new search engines from MyCroft", newEngine],
+        ["Reorder", "Drag and drop search engines", enableDrag],
+        ["Rename", "Click to rename search engines", enableRename],
+        ["Remove", "Click to remove search engines", enableRemove],
+        ["Restore all", "Restores all default search engines", restoreEngines],
+        ["Save", "Saves modified search engines", saveActions],
+        ["Cancel", "Cancels all recent modifications", cancelActions]
     ],
 
-    create: function(m) {
-        m.innerHTML += '<li class="header_button_menu_header">DDG Extended</li>';
-        for (var i = 0, li; i < this.size; i++) {
+    create: function (m) {
+        m.innerHTML += '<li class="nav-menu__heading">DDG Extended</li>';
+        for (var i = 0, li; i < this.strings.length; i++) {
             li = document.createElement("li");
-            li.className = "enabled";
-            li.innerHTML = '<a tabindex="-1" title="' + this.strings[i][1] + '">' + this.strings[i][0] + "</a>";
+            li.className = "nav-menu__item";
+            li.style.display = "list-item";
+            li.innerHTML = '<a href="#" tabindex="-1" title="' + this.strings[i][1] + '"><span>' + this.strings[i][0] + "</span></a>";
+            li.addEventListener("click", this.strings[i][2], false);
             this.list.push(li);
             m.appendChild(this.list[i]);
         }
-        this.list[5].className = "disabled";
-        this.list[6].className = "disabled";
+        this.list[5].style.display = "none";
+        this.list[6].style.display = "none";
         this.list[5].id = "ddg_e_save";
         this.list[6].id = "ddg_e_cancel";
-        this.list[0].addEventListener("click", newEngine, false);
-        this.list[1].addEventListener("click", enableDrag, false);
-        this.list[2].addEventListener("click", enableRename, false);
-        this.list[3].addEventListener("click", enableRemove, false);
-        this.list[4].addEventListener("click", restoreEngines, false);
-        this.list[5].addEventListener("click", saveActions, false);
-        this.list[6].addEventListener("click", cancelActions, false);
     },
 
-    toggleClass: function() {
+    toggle: function () {
         for (var i = 0; i < this.list.length; i++) {
-            if (this.list[i].className === "disabled")
-                this.list[i].className = "enabled";
+            if (this.list[i].style.display === "none")
+                this.list[i].style.display = "list-item";
             else
-                this.list[i].className = "disabled";
+                this.list[i].style.display = "none";
         }
     }
 
@@ -142,7 +135,7 @@ var mycroft = {
 
     plugins: null,
 
-    addLinks: function(p) {
+    addLinks: function (p) {
 
         if (p) {
             this.plugins = document.evaluate('//a[@href="/jsreq.html"]',
@@ -150,7 +143,7 @@ var mycroft = {
             var reviews = document.evaluate('//a[.="[Review]"]',
                 p, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
             var addLink = document.createElement("a");
-            addLink.setAttribute("href", "javascript:void(0)");
+            addLink.setAttribute("href", "#");
             addLink.setAttribute("style", "margin-left:5px; color:#000099");
             addLink.innerHTML = "[Add to DDG]";
             for (var i = 0, tmp; i < reviews.snapshotLength; i++) {
@@ -163,9 +156,8 @@ var mycroft = {
 
     },
 
-    addNewEngine: function() {
-        var current = GM_getValue("engines", ddg_e.
-            default);
+    addNewEngine: function () {
+        var current = GM_getValue("engines", ddg_e.default);
         var i = this.getAttribute("data-ind");
         var name = mycroft.plugins.snapshotItem(i).innerHTML.split(" (")[0].split(" -")[0];
         var newEngine = mycroft.plugins.snapshotItem(i).getAttribute("onClick").split("'")[1];
@@ -179,7 +171,7 @@ var mycroft = {
             GM_xmlhttpRequest({
                 method: "GET",
                 url: "http://mycroftproject.com/externalos.php/" + newEngine + ".xml",
-                onload: function(response) {
+                onload: function (response) {
                     var responseXML = null;
                     // Inject responseXML into existing Object (only appropriate for XML content).
                     if (!response.responseXML) {
@@ -199,25 +191,28 @@ var mycroft = {
 function onHashChange() {
     if (window.location.hash.indexOf("{searchTerms}") !== -1)
         window.location.hash = "";
-    window.addEventListener("hashchange", function() {
+    window.addEventListener("hashchange", function () {
         if (window.location.hash.indexOf("{searchTerms}") !== -1)
             window.location.href = window.location.hash.substr(1).replace("{searchTerms}", escape(document.getElementById("search_form_input").value));
     }, false);
 }
 
 function onColorChange(h, c) {
+            console.log(c);
     if (c !== null) {
-        c.addEventListener("change", function() {
+            console.log("asd");
+        c.addEventListener("change", function () {
+            var b = window.getComputedStyle(h).backgroundColor;
+            console.log(b);
             for (var i = 0; i < ddg_e.engines.length; i++)
-                ddg_e.engines[i].style.background = h.style.background;
+                ddg_e.engines[i].style.background = b;
         }, false);
     }
 }
 
 function restoreEngines() {
     if (confirm("Do you want to restore the default search engines?")) {
-        GM_setValue("engines", ddg_e.
-            default);
+        GM_setValue("engines", ddg_e.default);
         ddg_e.newList();
     }
 }
@@ -233,7 +228,7 @@ function cancelActions() {
 }
 
 function enableDrag() {
-    options.toggleClass();
+    options.toggle();
     for (var i = 0; i < ddg_e.engines.length; i++) {
         ddg_e.engines[i].style.cursor = "move";
         ddg_e.engines[i].className = "disabled";
@@ -244,7 +239,7 @@ function enableDrag() {
 }
 
 function enableRemove() {
-    options.toggleClass();
+    options.toggle();
     for (var i = 0; i < ddg_e.engines.length; i++) {
         ddg_e.engines[i].style.cursor = "crosshair";
         ddg_e.engines[i].className = "disabled";
@@ -253,7 +248,7 @@ function enableRemove() {
 }
 
 function enableRename() {
-    options.toggleClass();
+    options.toggle();
     for (var i = 0; i < ddg_e.engines.length; i++) {
         ddg_e.engines[i].style.cursor = "text";
         ddg_e.engines[i].className = "disabled";
@@ -262,7 +257,7 @@ function enableRename() {
 }
 
 function disableEvents() {
-    options.toggleClass();
+    options.toggle();
     for (var i = 0; i < ddg_e.engines.length; i++) {
         ddg_e.engines[i].style.cursor = "auto";
         ddg_e.engines[i].removeAttribute("class");
@@ -294,7 +289,8 @@ function newEngine() {
 /* Pure javascript and html5 drag-and-drop for an ordered list
  * source: https://gist.github.com/robophilosopher/7520460
  */
-var dragSrcEl,drop_index,numLis,count,token1,token2;
+var dragSrcEl, drop_index, numLis, count, token1, token2;
+
 function handleDragStart(e) {
     dragSrcEl = this;
     e.dataTransfer.effectAllowed = "move";
@@ -322,9 +318,10 @@ function handleDrop(e) {
         if (Math.abs(numLis) > 1) {
             token1 = this.innerHTML;
             this.innerHTML = e.dataTransfer.getData("text/html");
+            var i, counter;
             // bring premise up list
             if (numLis < -1) {
-                for (var i = drop_index, counter = 0; counter < count; counter++, i++) {
+                for (i = drop_index, counter = 0; counter < count; counter++, i++) {
                     token2 = ddg_e.engines[i].innerHTML;
                     ddg_e.engines[i].innerHTML = token1;
                     token1 = token2;
@@ -332,7 +329,7 @@ function handleDrop(e) {
             }
             // bring premise down list
             if (numLis > 1) {
-                for (var i = drop_index - 1, counter = 0; counter < count; counter++, i--) {
+                for (i = drop_index - 1, counter = 0; counter < count; counter++, i--) {
                     token2 = ddg_e.engines[i - 1].innerHTML;
                     ddg_e.engines[i - 1].innerHTML = token1;
                     token1 = token2;
@@ -347,10 +344,11 @@ function handleDrop(e) {
 if (window.location.href.indexOf("http://mycroftproject.com/") !== -1) {
     mycroft.addLinks(document.getElementById("plugins"));
 } else {
-    var header = document.getElementById("header");
+    var header = document.getElementById("header_wrapper");
+    var menu = document.getElementById("header_button_menu").getElementsByClassName("nav-menu__list")[0];
     if (header) {
         ddg_e.append(header);
-        options.create(document.getElementById("header_button_menu"));
-        onColorChange(header, document.getElementById("kj"));
+        options.create(menu);
+        onColorChange(header, document.getElementById("setting_kj"));
     }
 }
