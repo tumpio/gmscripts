@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name            DuckDuckGo Extended
-// @description     Extends DDG by adding a customizable list of additional search engines for making fast searches from other engines.
-// @namespace       userscripts.org/users/439657
-// @homepage        http://userscripts.org/scripts/show/129505
-// @icon            http://s3.amazonaws.com/uso_ss/icon/129505/large.png?1368599692
-// @updateURL       https://userscripts.org/scripts/source/129505.meta.js
-// @downloadURL     https://userscripts.org/scripts/source/129505.user.js
+// @description     Manage list of quick links to other search engines.
+// @author          tumpio
+// @namespace       tumpio@sci.fi
+// @homepage        https://openuserjs.org/scripts/tumpio/DuckDuckGo_Extended
+// @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/DuckDuckGo_Extended/large.png
+// @updateURL       https://github.com/tumpio/gmscripts/raw/master/DuckDuckGo_Extended/ddge.user.js
+// @downloadURL     https://github.com/tumpio/gmscripts/raw/master/DuckDuckGo_Extended/ddge.user.js
 // @match           *://duckduckgo.com/*
 // @exclude         *://duckduckgo.com/post2.html
 // @match           http://mycroftproject.com/*
@@ -13,9 +14,11 @@
 // @grant           GM_getValue
 // @grant           GM_setValue
 // @grant           GM_xmlhttpRequest
-// @version         2.0.2
-// @author          tumpio
+// @version         2.1.0
 // ==/UserScript==
+
+if (window.top !== window.self) // NOTE: Do not run on iframes
+    return;
 
 var ddg_e = {
 
@@ -39,9 +42,9 @@ var ddg_e = {
 
     style: "#ddg_extented { float:left; width:100%; position:relative; top:5px; z-index:-1 }\
 #ddg_extented ol { clear:left; float:right; list-style:none; position:relative; right:50%; text-align:center; margin:0; padding:0 }\
-#ddg_extented li { display:inline; list-style:none; position:relative; left:50%; box-shadow:0 2px 5px 0 #888; margin:0; padding:0; background:#b60002 }\
-#ddg_extented li:first-child { border-bottom-left-radius: 10px }\
-#ddg_extented li:last-child { border-bottom-right-radius: 10px }\
+#ddg_extented li { display:inline; list-style:none; position:relative; left:50%; box-shadow:0 2px 5px 0 #888; margin:0; background:#c9481c }\
+#ddg_extented li:first-child { border-bottom-left-radius: 3px }\
+#ddg_extented li:last-child { border-bottom-right-radius: 3px }\
 #ddg_extented li a:link,li a:visited { text-decoration:none; color:#fff; font-size:1em; font-weight:700; padding:0 9px }\
 #ddg_extented li a:hover { color:#91C5EE }\
 #ddg_extented li:hover { box-shadow:0 3px 3px 0 #888 }\
@@ -80,8 +83,8 @@ body #header_wrapper #header #header_content_wrapper #header_content #header_but
     append: function (h) {
         var e = document.createElement("div");
         var b = window.getComputedStyle(h).backgroundColor;
-        if (b.indexOf("255, 255, 255") < 0 && b.toLowerCase.indexOf("#ffffff") < 0)
-            this.style += "#ddg_extented li { background:" + b + "!important }";
+        if (b.indexOf("255, 255, 255") < 0 && b.indexOf("#ffffff") < 0)
+            this.style += "#ddg_extented li { background-color:" + b + "!important }";
         GM_addStyle(this.style);
         e.setAttribute("id", "ddg_extented");
         e.appendChild(this.list);
@@ -198,12 +201,9 @@ function onHashChange() {
 }
 
 function onColorChange(h, c) {
-            console.log(c);
     if (c !== null) {
-            console.log("asd");
         c.addEventListener("change", function () {
             var b = window.getComputedStyle(h).backgroundColor;
-            console.log(b);
             for (var i = 0; i < ddg_e.engines.length; i++)
                 ddg_e.engines[i].style.background = b;
         }, false);
@@ -349,6 +349,6 @@ if (window.location.href.indexOf("http://mycroftproject.com/") !== -1) {
     if (header) {
         ddg_e.append(header);
         options.create(menu);
-        onColorChange(header, document.getElementById("setting_kj"));
+        //onColorChange(header, document.getElementById("setting_kj"));
     }
 }
