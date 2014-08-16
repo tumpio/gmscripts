@@ -1,6 +1,6 @@
-// ==UserScript
+// ==UserScript==
 // @name            Endless Google
-// @description     Load more results automatically and endlessly.==
+// @description     Load more results automatically and endlessly.
 // @author          tumpio
 // @namespace       tumpio@sci.fi
 // @homepage        https://openuserjs.org/scripts/tumpio/tumpiosci.fi/Endless_Google
