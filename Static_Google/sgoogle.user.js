@@ -2,11 +2,11 @@
 // @name            Static Google
 // @description     Google search interface always visible on screen, and some additional changes for more compact layout.
 // @author          tumpio
+// @oujs:author     tumpio
 // @namespace       tumpio@sci.fi
-// @homepage        http://userscripts.org/scripts/show/131016
+// @homepageURL     https://openuserjs.org/scripts/tumpio/DuckDuckGo_Extended
+// @supportURL      https://github.com/tumpio/gmscripts
 // @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/Static_Google/large.png
-// @updateURL       https://github.com/tumpio/gmscripts/raw/master/Static_Google/131016.user.js
-// @downloadURL     https://github.com/tumpio/gmscripts/raw/master/Static_Google/131016.user.js
 // @resource        css http://userstyles.org/styles/99153.css
 // @include         http://www.google.*
 // @include         https://www.google.*
