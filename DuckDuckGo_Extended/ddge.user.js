@@ -2,11 +2,11 @@
 // @name            DuckDuckGo Extended
 // @description     Manage list of quick links to other search engines.
 // @author          tumpio
+// @oujs:author     tumpio
 // @namespace       tumpio@sci.fi
-// @homepage        https://openuserjs.org/scripts/tumpio/DuckDuckGo_Extended
+// @homepageURL     https://openuserjs.org/scripts/tumpio/DuckDuckGo_Extended
+// @supportURL      https://github.com/tumpio/gmscripts
 // @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/DuckDuckGo_Extended/large.png
-// @updateURL       https://github.com/tumpio/gmscripts/raw/master/DuckDuckGo_Extended/ddge.user.js
-// @downloadURL     https://github.com/tumpio/gmscripts/raw/master/DuckDuckGo_Extended/ddge.user.js
 // @match           *://duckduckgo.com/*
 // @exclude         *://duckduckgo.com/post2.html
 // @match           http://mycroftproject.com/*

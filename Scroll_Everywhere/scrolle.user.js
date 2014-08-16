@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name            Scroll Everywhere
-// @description     My own userscript implementation of the Scrollbar Anywhere Firefox add-on.
-// @namespace       userscripts.org/users/439657
-// @homepage        http://userscripts.org/scripts/show/168000
-// @icon            http://s3.amazonaws.com/uso_ss/icon/168000/large.png?1369075473
-// @updateURL       https://userscripts.org/scripts/source/168000.meta.js
-// @downloadURL     https://userscripts.org/scripts/source/168000.user.js
+// @description     Scroll everywhere with right mouse button.
+// @author          tumpio
+// @oujs:author     tumpio
+// @namespace       tumpio@sci.fi
+// @homepageURL     https://openuserjs.org/scripts/tumpio/Scroll_Everywhere
+// @supportURL      https://github.com/tumpio/gmscripts
+// @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/Scroll_Everywhere/large.png
 // @include         *
 // @grant           none
-// @author          tumpio
 // @version         0.3a
 // ==/UserScript==
 
