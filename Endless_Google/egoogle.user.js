@@ -12,16 +12,12 @@
 // @include         https://encrypted.google.*
 // @run-at          document-start
 // @grant           GM_xmlhttpRequest
-// @version         0.0.3
+// @version         0.0.4
 // ==/UserScript==
 
 // TODO: on page refresh:
-//  1: return to the original position by reloading all previous pages again, what if +100 pages opened!
-//  2: load only the first page (prevent restoring the scroll position) (default now)
-//      http://stackoverflow.com/questions/10742422/prevent-browser-scroll-on-html5-history-popstate
-//  3: load only the last scrolled page (on refresh, load last requested page) (could be a good default, needs scroll up support)
+//  2: load only the last scrolled page (on refresh, load last requested page) (could be a good default, needs scroll up support)
 //      beforeunload -> store last requested page with GM_setVariable() and reload it instead
-// TODO: percentage of window height left on document to request next page
 // TODO: onerror, onabort: show to user "page loading failed", button to retry
 
 // FIXME: bug: Suggested images don't show up on new requested pages
@@ -36,6 +32,7 @@
 // FUTURE: show page fav-icons for results
 // FUTURE: number results
 // FUTURE: option to load static google css
+// FUTURE: support scroll up
 
 if (location.href.indexOf("tbm=isch") !== -1) // NOTE: Don't run on image search
     return;
@@ -45,24 +42,27 @@ if (window.top !== window.self) // NOTE: Do not run on iframes
 document.addEventListener('DOMContentLoaded', function () {
 
     // NOTE: Options
-    var request_pct = 0.75; // percentage of page height to request next page, must be between 0-1
+    var request_pct = 0.05; // percentage of window height left on document to request next page, value must be between 0-1
     var event_type = "scroll"; // or "wheel"
-    var prevent_scrollPos = true; // prevent restoring scroll position on refresh
-
+    var on_page_refresh = 1;
+    // 0: reload all previous pages requested
+    // 1: load only the first page (prevent restoring the scroll position)
+    // 2: load only the last page requested
     var main = document.getElementById("main");
     var rcnt = document.getElementById("rcnt");
     var input = document.getElementById("gbqfq");
+    var input_value = input.value;
     var old_scrollY = 0;
     var scroll_events = 0;
     var next_link = null;
     var cols = [];
     var request_offsetHeight = 0;
 
-    input.addEventListener("input", onNewSearch, false); // NOTE: listens for new search input to reset state
-    window.addEventListener(event_type, scroll, false);
-    window.onbeforeunload = function () {
+    input.addEventListener("blur", reset, false); // NOTE: listens for new search input to reset state
+    window.addEventListener(event_type, onScroll, false);
+    window.addEventListener("beforeunload", function () {
         window.scrollTo(0, 0);
-    };
+    }, false);
 
     function requestNextPage(link) {
         console.log("request next");
@@ -96,19 +96,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!rcnt || cols.length === 1) // NOTE: needs to be rechecked on a state reset too, and late insertation of element on google instant
                     rcnt = document.getElementById("rcnt");
                 rcnt.appendChild(next_col);
-                window.addEventListener(event_type, scroll, false);
+                window.addEventListener(event_type, onScroll, false);
             }
         });
 
     }
 
-    function scroll(e) {
+    function onScroll(e) {
         var y = window.scrollY;
         // if (scroll_events === 0) old_scrollY = y; // stops only if scroll position was on 2. page
         var delta = e.deltaY || y - old_scrollY; // NOTE: e.deltaY for "wheel" event
-        if (delta > 0 && (window.innerHeight + y) >= (document.body.clientHeight - 100)) { // NOTE: using .clientHeight instead of .offsetheight
+        if (delta > 0 && (window.innerHeight + y) >= (document.body.clientHeight - (window.innerHeight * request_pct))) {
             console.log("scroll end");
-            window.removeEventListener(event_type, scroll, false);
+            window.removeEventListener(event_type, onScroll, false);
 
             try {
                 requestNextPage(next_link || document.getElementById("pnnext").href);
@@ -123,24 +123,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // NOTE: Resets the script state on a new search
     function reset() {
-        console.log("RESET");
-        input.removeEventListener("blur", reset, false);
-        for (var i = 0; i < cols.length; i++)
-            rcnt.removeChild(cols[i]);
-        cols = [];
-        next_link = null;
-        old_scrollY = 0;
-        scroll_events = 0;
-        window.addEventListener(event_type, scroll, false);
-        input.addEventListener("input", onNewSearch, false);
+        if (input.value !== input_value) {
+            input_value = input.value;
+            window.scrollTo(0, 0);
+            for (var i = 0; i < cols.length; i++)
+                rcnt.removeChild(cols[i]);
+            cols = [];
+            next_link = null;
+            old_scrollY = 0;
+            scroll_events = 0;
+            console.log("RESET");
+            }
     }
 
-    function onNewSearch() {
-        console.log("input changed");
-        input.removeEventListener("input", onNewSearch, false);
-        window.removeEventListener(event_type, scroll, false);
-        input.addEventListener("blur", reset, false);
-    }
     console.log("egoogle.js initialized");
 });
 console.log("egoogle.js loaded");
