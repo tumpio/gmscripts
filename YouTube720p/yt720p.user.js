@@ -1,34 +1,16 @@
 // ==UserScript==
-// @name           YouTube720p
-// @version        1.2b
-// @author         tumpio
-// @description    Adds &hd=1 to the end of current video URL @ document-start and to all other video watch URLs everywhere on YouTube.
-// @include        http://www.youtube.com/*
-// @include        https://www.youtube.com/*
-// @run-at         document-start
+// @name            YouTube720p
+// @description     Adds &hd=1 to the end of current video URL @ document-start.
+// @author          tumpio
+// @oujs:author     tumpio
+// @namespace       tumpio@sci.fi
+// @homepageURL     https://openuserjs.org/scripts/tumpio/YouTube720p
+// @supportURL      https://github.com/tumpio/gmscripts
+// @include         http://www.youtube.com/watch?v=*
+// @include         https://www.youtube.com/watch?v=*
+// @exclude         https://www.youtube.com/watch?v=*&hd=1*
+// @run-at          document-start
+// @version         1.3
 // ==/UserScript==
 
-var url = window.location.href;
-var hd = "&hd=1";
-window.addEventListener('load', function ()
-{
-  var links = document.evaluate(
-      "//a[contains(@href, 'watch?v=')]", document, null,
-      XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-  for (var i = links.snapshotLength; i--; )
-  {
-    links.snapshotItem(i).setAttribute("href",
-      links.snapshotItem(i).getAttribute("href") + hd);
-  }
-}
-);
-if (GM_getValue("YouTube720p_URL", "") === url)
-{
-  GM_setValue("YouTube720p_URL", "");
-  return;
-}
-if (url.indexOf("youtube.com/watch?") >= 0 && url.indexOf(hd) === -1)
-{
-  GM_setValue("YouTube720p_URL", url);
-  window.location.href += hd;
-}
+window.location.replace(window.location.href + "&hd=1")
