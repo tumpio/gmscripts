@@ -14,7 +14,7 @@
 // @grant           GM_getValue
 // @grant           GM_setValue
 // @grant           GM_xmlhttpRequest
-// @version         2.1.0
+// @version         2.1.1
 // ==/UserScript==
 
 if (window.top !== window.self) // NOTE: Do not run on iframes
@@ -345,8 +345,8 @@ if (window.location.href.indexOf("http://mycroftproject.com/") !== -1) {
     mycroft.addLinks(document.getElementById("plugins"));
 } else {
     var header = document.getElementById("header_wrapper");
-    var menu = document.getElementById("header_button_menu").getElementsByClassName("nav-menu__list")[0];
-    if (header) {
+    var menu = document.getElementsByClassName("nav-menu__list")[0];
+    if (header && menu) {
         ddg_e.append(header);
         options.create(menu);
         //onColorChange(header, document.getElementById("setting_kj"));
