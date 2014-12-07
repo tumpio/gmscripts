@@ -7,7 +7,8 @@
 // @homepageURL     https://openuserjs.org/scripts/tumpio/DuckDuckGo_Extended
 // @supportURL      https://github.com/tumpio/gmscripts
 // @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/DuckDuckGo_Extended/large.png
-// @match           *://duckduckgo.com/*
+// @include *://duckduckgo.com/*
+// @match *://duckduckgo.com/*
 // @exclude         *://duckduckgo.com/post2.html
 // @match           http://mycroftproject.com/*
 // @grant           GM_addStyle
@@ -107,14 +108,15 @@ var options = {
     ],
 
     create: function (m) {
-        m.innerHTML += '<li class="nav-menu__heading">DDG Extended</li>';
+        m.innerHTML += '<li class="nav-menu__heading">DDG Extended';
         for (var i = 0, li; i < this.strings.length; i++) {
-            li = document.createElement("li");
+            li = document.createElement("span");
             li.className = "nav-menu__item";
-            li.style.display = "list-item";
-            li.innerHTML = '<a href="#" tabindex="-1" title="' + this.strings[i][1] + '"><span>' + this.strings[i][0] + "</span></a>";
+            li.style.display = "";
+            li.innerHTML = '<a href="#" tabindex="-1" title="' + this.strings[i][1] + '"><div>' + this.strings[i][0] + "</div></a>";
             li.addEventListener("click", this.strings[i][2], false);
             this.list.push(li);
+            m.innerHTML += "</li>"
             m.appendChild(this.list[i]);
         }
         this.list[5].style.display = "none";
@@ -345,7 +347,7 @@ if (window.location.href.indexOf("http://mycroftproject.com/") !== -1) {
     mycroft.addLinks(document.getElementById("plugins"));
 } else {
     var header = document.getElementById("header_wrapper");
-    var menu = document.getElementsByClassName("nav-menu__list")[0];
+    var menu = document.getElementsByClassName("results--sidebar")[0];
     if (header && menu) {
         ddg_e.append(header);
         options.create(menu);
