@@ -2,10 +2,6 @@
 
 @-moz-document regexp("^https?://(www|encrypted)\.google(\.[a-z]{2,3}){1,2}/((search\\?|((webhp)?(\\?|#))).*)?$") {
 
-#ab_ctls {
-    top: -28px!important;
-}
-
 #appbar,
 #top_nav,
 #rhscol {
@@ -104,8 +100,7 @@
 
 #hdtb-tls,
 #hdtb-more,
-#epbar,
-#appbar {
+#epbar {
     display: none!important;
 }
 
@@ -119,11 +114,16 @@
     min-width: 10px!important;
 }
 
-#main #cnt #rcnt {
-    margin-top: 35px!important;
+#rcnt {
+    margin-top: 80px!important;
 }
 
 #gsr table.gssb_c {
     position: fixed!important;
+}
+
+#appbar {
+    position: absolute!important;
+    top: 94px!important;
 }
 }
