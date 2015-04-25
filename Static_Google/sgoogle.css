@@ -76,7 +76,7 @@
 
 #hdtb-msb .hdtb-mitem.hdtb-msel,
 #hdtb-msb .hdtb-mitem.hdtb-msel-pre {
-    margin-left: 0!important;
+    margin: 0!important;
     border-bottom: none!important;
     border-left: 3px solid #dd4b39;
 }
