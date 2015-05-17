@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 2: load only the last page requested
     var main = document.getElementById("main");
     var rcnt = document.getElementById("rcnt");
-    var input = document.getElementById("gbqfq");
+    var input = document.getElementById("lst-ib");
     var input_value = input.value;
     var old_scrollY = 0;
     var scroll_events = 0;
