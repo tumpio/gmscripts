@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var next_link = null;
     var cols = [];
     var request_offsetHeight = 0;
+    var stop_events = false;
 
     input.addEventListener("blur", reset, false); // NOTE: listens for new search input to reset state
     window.addEventListener(event_type, onScroll, false);
@@ -96,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!rcnt || cols.length === 1) // NOTE: needs to be rechecked on a state reset too, and late insertation of element on google instant
                     rcnt = document.getElementById("rcnt");
                 rcnt.appendChild(next_col);
+                stop_events = false;
                 window.addEventListener(event_type, onScroll, false);
             }
         });
@@ -111,7 +113,10 @@ document.addEventListener('DOMContentLoaded', function () {
             window.removeEventListener(event_type, onScroll, false);
 
             try {
-                requestNextPage(next_link || document.getElementById("pnnext").href);
+                if(!stop_events){
+                    stop_events = true;
+                    requestNextPage(next_link || document.getElementById("pnnext").href);
+                }
             } catch (err) {
                 console.error(err.name + ": " + err.message);
                 // NOTE: recovery unnecessary, input event handles it with reset on new search
