@@ -72,6 +72,9 @@ document.addEventListener('DOMContentLoaded', function () {
             method: "GET",
             url: link,
             onload: function (response) {
+                var el = document.getElementById('navcnt');
+                el.parentNode.removeChild(el); //Deletes the navigation box
+                
                 var holder = document.createElement("div");
                 holder.innerHTML = response.responseText;
                 next_link = holder.querySelector("#pnnext").href;
