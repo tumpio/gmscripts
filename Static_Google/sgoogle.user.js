@@ -7,14 +7,14 @@
 // @homepageURL     https://openuserjs.org/scripts/tumpio/DuckDuckGo_Extended
 // @supportURL      https://github.com/tumpio/gmscripts
 // @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/Static_Google/large.png
-// @resource        css http://userstyles.org/styles/99153.css
+// @resource        css http://userstyles.org/styles/99153.css?ver=1.9.2
 // @include         http://www.google.*
 // @include         https://www.google.*
 // @include         https://encrypted.google.*
 // @run-at          document-start
 // @grant           GM_addStyle
 // @grant           GM_getResourceText
-// @version         1.9.1
+// @version         1.9.2
 // ==/UserScript==
 
 // Do not run on iframes > image search
