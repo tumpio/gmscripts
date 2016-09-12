@@ -14,7 +14,7 @@
 // @run-at          document-start
 // @grant           GM_addStyle
 // @grant           GM_getResourceText
-// @version         1.9.0
+// @version         1.9.1
 // ==/UserScript==
 
 // Do not run on iframes > image search
