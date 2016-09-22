@@ -7,12 +7,16 @@
     min-width: 0!important;
 }
 
-#center_col {
-    margin-left:11em!important;
+#cnt {
+    padding-top: 4em!important;
+}
+    
+#rcnt {
+    margin-left: 10em!important;
 }
 
-#rcnt {
-    margin-top: 2em;
+#center_col {
+    margin-left:0!important;
 }
 
 #searchform {
@@ -34,24 +38,31 @@
     z-index: 103;
 }
 
-#hdtbSum {
+#hdtb {
     position: fixed!important;
-    top: 8em!important;
+    top: 7.5em!important;
     width: 8em!important;
     z-index: 102;
-    margin: 1em;
     border-bottom: none!important;
     background: none!important;
 }
 
-#hdtb-more {
-    display: block!important;
+#hdtbSum {
+    z-index: 104;
+    border-bottom: none!important;
+    background: none!important;
+}
+    
+#hdtb-more-mn {
     position: relative!important;
     top: 0!important;
-    padding: 0!important;
+    left: 0!important;
+    background: transparent!important;
     border: none!important;
+    box-shadow: none!important;
+    padding: 0!important;
 }
-
+    
 .hdtbItm.hdtbSel,
 #hdtb .hdtbItm a,
 #hdtb-more-mn a,
@@ -60,23 +71,33 @@
     line-height: 42px!important;
 }
 
-#hdtb-msb .hdtb-mitem.hdtb-msel,
-#hdtb-msb .hdtb-mitem.hdtb-msel-pre {
-    padding-left: 1em!important;
-}
-
-#hdtb-msb .hdtb-mitem {
+#hdtb .hdtb-mitem,
+#hdtb-more {
     float: left!important;
     clear: left!important;
     box-sizing: border-box;
     margin: 0!important;
     padding: 0!important;
+    margin-left: 2em!important;
 }
 
-#hdtb .hdtb-mitem a {
+#hdtb .hdtb-mitem a,
+#hdtb-more {
     display: block;
     margin: 0;
-    padding-left: 16px;
+    padding: 0!important;
+}
+
+#hdtb-msb .hdtb-mitem.hdtb-msel,
+#hdtb-msb .hdtb-mitem.hdtb-msel-pre {
+    margin-left: 0!important;
+    padding-left: 1.5em!important;
+    border: none!important;
+    border-left: 3px solid #4285f4!important;
+}
+
+#hdtb-more-mn .hdtb-mitem a:hover {
+    background: transparent!important;
 }
 
 #hdtb-msb,
@@ -85,7 +106,6 @@
 }
 
 #hdtb-tls,
-#hdtb-more,
 #epbar {
     display: none!important;
 }
@@ -93,7 +113,7 @@
 #ab_ctls {
     position: fixed!important;
     top: 48px!important;
-    right: 35px!important;
+    right: 30px!important;
 }
 
 #ab_ctls a.ab_button {
@@ -103,5 +123,13 @@
 #gsr table.gssb_c {
     position: fixed!important;
 }
+
+#bcenter > .col {
+    float: right!important;
+}
+
+#irc_bg {
+    left: auto!important;
+}    
 
 }
