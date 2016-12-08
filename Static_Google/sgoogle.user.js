@@ -16,7 +16,7 @@
 // @run-at          document-start
 // @grant           GM_addStyle
 // @grant           GM_getResourceText
-// @version         1.9.5
+// @version         1.9.6
 // ==/UserScript==
 
 // Static css, from userstyle.org, remove @-moz-document
