@@ -24,7 +24,6 @@
     #hdtbSum {
         position: fixed!important;
         background: white!important;
-        height: 100%!important;
         margin-top: 1px!important;
     }
     #hdtb-msb {
@@ -33,26 +32,22 @@
     #center_col {
         margin-left: 150px!important;
     }
-    #footcnt {
-        position: relative!important;
-        z-index: 103!important;
-    }
     .hdtb-mitem {
         display: block!important;
         margin: 0!important;
-        width: 100%!important;
+        height: auto!important;
+        padding-top: 0!important;
     }
     .hdtb-mitem > a,
     #hdtb-msb div:first-child g-popup a {
         display: block!important;
-        height: 53px;
-        line-height: 56px;
         width: 100%!important;
+        padding: 1.5em!important;
     }
     .hdtb-mitem.hdtb-msel,
     .hdtb-mitem.hdtb-msel-pre {
-        margin-left: 0!important;
-        padding-left: 1.5em!important;
+        margin: 0!important;
+        padding: 1.5em!important;
         border: none!important;
         border-left: 3px solid #4285f4!important;
     }
