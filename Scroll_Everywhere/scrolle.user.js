@@ -24,9 +24,7 @@ var mouseBtn, reverse, stopOnSecondClick, verticalScroll, startAnimDelay, cursor
     scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart, speed;
 
 
-var button = document.createElement("div")
-button.id = "autoscroll"
-document.getElementById("autoscroll").innerHTML = '<button onclick="Autoscroll()" style="position: fixed;bottom: 0;left: 0;"><img src="https://www.iconfinder.com/icons/51758/download/png/64"></img></button>'
+
 // NOTE: Do not run on iframes
 if (window.top === window.self) {
     // USER SETTINGS
