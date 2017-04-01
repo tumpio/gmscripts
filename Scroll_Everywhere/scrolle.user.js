@@ -20,7 +20,10 @@
 // FUTURE: Options dialog
 
 var mouseBtn, reverse, stopOnSecondClick, verticalScroll, startAnimDelay, cursorStyle, down,
-    scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart;
+    scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart, speed;
+var s = document.createElement("script");
+s.src = "https://code.jquery.com/jquery-3.2.0.js";
+document.head.appendChild(s); //importing Jquery into the page, required for the auto-scroll
 
 // NOTE: Do not run on iframes
 if (window.top === window.self) {
@@ -32,6 +35,7 @@ if (window.top === window.self) {
     slowScrollStart = false; // slow scroll start on begin
     startAnimDelay = 150; // slow scroll start mode animation delay
     cursorStyle = "grab"; // cursor style on scroll
+    speed= 10000; //speed of the auto-scroll function
     // END
 
     fScroll = ((reverse) ? fRevPos : fPos);
@@ -134,3 +138,12 @@ function fFalse() {
 function slowF(x) {
     return 1 / (1 + Math.pow(Math.E, (-0.1 * x)));
 }
+
+function scroll(speed) {
+    $('html, body').animate({ scrollTop: $(document).height() - $(window).height() }, speed, function() {
+        $(this).animate({ scrollTop: 0 }, speed);
+    });
+}
+
+//need to implement a button to start the autoscroll fuctionality, it is fully working now but you will have to call the function from the js console.
+
