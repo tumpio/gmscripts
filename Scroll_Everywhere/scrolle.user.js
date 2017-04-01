@@ -10,6 +10,7 @@
 // @include         *
 // @grant           none
 // @version         0.3a
+// @require         https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // ==/UserScript==
 
 /* jshint multistr: true, strict: false, browser: true, devel: true */
@@ -21,10 +22,11 @@
 
 var mouseBtn, reverse, stopOnSecondClick, verticalScroll, startAnimDelay, cursorStyle, down,
     scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart, speed;
-var s = document.createElement("script");
-s.src = "https://code.jquery.com/jquery-3.2.0.js";
-document.head.appendChild(s); //importing Jquery into the page, required for the auto-scroll
 
+
+var button = document.createElement("div")
+button.id = "autoscroll"
+document.getElementById("autoscroll").innerHTML = '<button onclick="Autoscroll()" style="position: fixed;bottom: 0;left: 0;"><img src="https://www.iconfinder.com/icons/51758/download/png/64"></img></button>'
 // NOTE: Do not run on iframes
 if (window.top === window.self) {
     // USER SETTINGS
@@ -139,7 +141,7 @@ function slowF(x) {
     return 1 / (1 + Math.pow(Math.E, (-0.1 * x)));
 }
 
-function scroll(speed) {
+function Autoscroll(speed) {
     $('html, body').animate({ scrollTop: $(document).height() - $(window).height() }, speed, function() {
         $(this).animate({ scrollTop: 0 }, speed);
     });
