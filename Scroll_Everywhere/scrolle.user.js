@@ -19,7 +19,7 @@
 // TODO: add slow scroll start mode
 // FIXME: Linux/mac context menu on mousedown, probably needs browser level
 // FUTURE: Options dialog
-
+this.$ = this.jQuery = jQuery.noConflict(true);
 var mouseBtn, reverse, stopOnSecondClick, verticalScroll, startAnimDelay, cursorStyle, down,
     scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart, speed;
 
