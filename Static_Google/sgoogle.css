@@ -38,7 +38,7 @@
         height: auto!important;
         padding-top: 0!important;
     }
-    .hdtb-mitem > a,
+    .hdtb-mitem:not(#ab_options) > a,
     #hdtb-msb div:first-child g-popup a {
         display: block!important;
         width: 100%!important;
@@ -91,6 +91,7 @@
         position: fixed!important;
         top: 66px!important;
         right: 14px!important;
+        padding-left: 8em!important;
     }
     #ab_options {
         position: fixed!important;
