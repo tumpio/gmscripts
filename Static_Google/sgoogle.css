@@ -103,14 +103,9 @@
     
     
     /* SafeSearch button
-     *   Place under login button before settings button.
+     *   Hide the button. It can be configured from Google's search settings.
      */
     #ab_ctls {
-        position: fixed!important;
-        top: 54px!important;
-        right: 150px!important;
-    }
-    a.ab_button {
-        color: #777;
+        display: none!important;
     }
 }
