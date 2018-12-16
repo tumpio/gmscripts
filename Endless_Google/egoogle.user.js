@@ -47,10 +47,10 @@ let prevScrollY = 0;
 let nextPageLoading = false;
 
 function requestNextPage() {
+    nextPageLoading = true;
     let nextPage = new URL(location.href);
     if (!nextPage.searchParams.has("q")) return;
-  
-    nextPageLoading = true;
+
     nextPage.searchParams.set("start", String(pageNumber * 10));
 
     fetch(nextPage.href)
@@ -59,26 +59,26 @@ function requestNextPage() {
             let parser = new DOMParser();
             let htmlDocument = parser.parseFromString(text, "text/html");
             let content = htmlDocument.documentElement.querySelector(centerElement);
-      
-			content.id = "col_" + pageNumber;
+
+            content.id = "col_" + pageNumber;
             filter(content, filtersCol);
-            
+
             let pageMarker = document.createElement("div");
             pageMarker.textContent = String(pageNumber + 1);
             pageMarker.className = "page-number";
-            
+
             let col = document.createElement("div");
             col.className = "next-col";
             col.appendChild(pageMarker);
             col.appendChild(content);
             document.querySelector(centerElement).appendChild(col);
-      
-			if (!content.querySelector("#ires")) {
-				// end of results
-				window.removeEventListener("scroll", onScrollDocumentEnd);
-				return;
+
+            if (!content.querySelector("#ires")) {
+                // end of results
+                window.removeEventListener("scroll", onScrollDocumentEnd);
+                return;
             }
-    				
+
             pageNumber++;
             nextPageLoading = false;
         });
@@ -101,7 +101,7 @@ function filter(node, filters) {
     for (let filter of filters) {
         let child = node.querySelector(filter);
         if (child) {
-	          child.parentNode.removeChild(child);
+            child.parentNode.removeChild(child);
         }
     }
 }
@@ -109,7 +109,7 @@ function filter(node, filters) {
 function init() {
     prevScrollY = window.scrollY;
     window.addEventListener("scroll", onScrollDocumentEnd);
-  	filter(document, filtersAll);
+    filter(document, filtersAll);
     let style = document.createElement("style");
     style.type = "text/css";
     style.appendChild(document.createTextNode(css));
