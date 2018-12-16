@@ -59,8 +59,8 @@ function requestNextPage() {
             let parser = new DOMParser();
             let htmlDocument = parser.parseFromString(text, "text/html");
             let content = htmlDocument.documentElement.querySelector(centerElement);
-            content.id = "col_" + pageNumber;
       
+			content.id = "col_" + pageNumber;
             filter(content, filtersCol);
             
             let pageMarker = document.createElement("div");
@@ -72,6 +72,12 @@ function requestNextPage() {
             col.appendChild(pageMarker);
             col.appendChild(content);
             document.querySelector(centerElement).appendChild(col);
+      
+			if (!content.querySelector("#ires")) {
+				// end of results
+				window.removeEventListener("scroll", onScrollDocumentEnd);
+				return;
+            }
     				
             pageNumber++;
             nextPageLoading = false;
