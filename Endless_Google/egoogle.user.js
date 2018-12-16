@@ -2,15 +2,16 @@
 // @name            Endless Google
 // @description     Load more results automatically and endlessly.
 // @author          tumpio
-// @oujs:author     tumpio
 // @namespace       tumpio@sci.fi
-// @homepageURL     https://github.com/tumpio/gmscripts
+// @homepageURL     https://openuserjs.org/scripts/tumpio/Endless_Google
+// @supportURL      https://github.com/tumpio/gmscripts/issues
 // @icon            https://github.com/tumpio/gmscripts/raw/master/Endless_Google/large.png
 // @include         http://www.google.*
 // @include         https://www.google.*
 // @include         https://encrypted.google.*
 // @run-at          document-start
 // @version         0.0.5
+// @license         MIT
 // @noframes
 // ==/UserScript==
 
