@@ -67,7 +67,7 @@ function requestNextPage() {
     if (!nextPage.searchParams.has("q")) return;
 
     nextPage.searchParams.set("start", String(pageNumber * 10));
-		msg.classList.toggle("shown");
+		!msg.classList.contains("shown") && msg.classList.add("shown");
     fetch(nextPage.href)
         .then(response => response.text())
         .then(text => {
@@ -91,14 +91,13 @@ function requestNextPage() {
             if (!content.querySelector("#ires")) {
                 // end of results
                 window.removeEventListener("scroll", onScrollDocumentEnd);
-                nextPageLoading = false;
-                msg.classList.toggle("shown");
+                msg.classList.contains("shown") && msg.classList.remove("shown");
                 return;
             }
 
             pageNumber++;
             nextPageLoading = false;
-            msg.classList.toggle("shown");
+      			msg.classList.contains("shown") && msg.classList.remove("shown");
         });
 }
 
