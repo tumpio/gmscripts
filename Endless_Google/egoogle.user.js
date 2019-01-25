@@ -91,6 +91,7 @@ function requestNextPage() {
             if (!content.querySelector("#ires")) {
                 // end of results
                 window.removeEventListener("scroll", onScrollDocumentEnd);
+                nextPageLoading = false;
                 msg.classList.toggle("shown");
                 return;
             }
