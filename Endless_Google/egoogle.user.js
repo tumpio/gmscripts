@@ -97,7 +97,7 @@ function requestNextPage() {
 
             pageNumber++;
             nextPageLoading = false;
-      			msg.classList.toggle("shown");
+            msg.classList.toggle("shown");
         });
 }
 
