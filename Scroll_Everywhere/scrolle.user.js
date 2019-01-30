@@ -21,7 +21,7 @@
 
 var mouseBtn, reverse, stopOnSecondClick, verticalScroll, startAnimDelay, cursorStyle, down,
     scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart,
-    lastX, lastY, scaleX, scaleY;
+    lastX, lastY, scaleX, scaleY, power;
 
 // NOTE: Do not run on iframes
 if (window.top === window.self) {
@@ -36,6 +36,7 @@ if (window.top === window.self) {
     relativeScrolling = false; // scroll the page relative to where we are now
     scaleX = -3; // how fast to scroll with relative scrolling
     scaleY = -3; // use negative values for "natural scrolling" (push the page)
+    power = 3; // when moving the mouse faster, how quickly should it speed up?
     // END
 
     fScroll = ((reverse) ? fRevPos : fPos);
@@ -90,7 +91,9 @@ function scroll(e) {
     if (relativeScrolling) {
       var diffX = e.clientX - lastX;
       var diffY = e.clientY - lastY;
-      window.scrollTo(window.scrollX + diffX * scaleX, window.scrollY + diffY * scaleY);
+      var distance = Math.sqrt(diffX * diffX + diffY * diffY);
+      var velocity = 1 + distance * power / 100;
+      window.scrollTo(window.scrollX + diffX * scaleX * velocity, window.scrollY + diffY * scaleY * velocity);
       lastX = e.clientX;
       lastY = e.clientY;
       return;
