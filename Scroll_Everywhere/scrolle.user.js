@@ -9,7 +9,7 @@
 // @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/Scroll_Everywhere/large.png
 // @include         *
 // @grant           none
-// @version         0.3a
+// @version         0.3b
 // ==/UserScript==
 
 /* jshint multistr: true, strict: false, browser: true, devel: true */
@@ -20,7 +20,8 @@
 // FUTURE: Options dialog
 
 var mouseBtn, reverse, stopOnSecondClick, verticalScroll, startAnimDelay, cursorStyle, down,
-    scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart;
+    scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart,
+    lastX, lastY, scaleX, scaleY;
 
 // NOTE: Do not run on iframes
 if (window.top === window.self) {
@@ -32,6 +33,9 @@ if (window.top === window.self) {
     slowScrollStart = false; // slow scroll start on begin
     startAnimDelay = 150; // slow scroll start mode animation delay
     cursorStyle = "grab"; // cursor style on scroll
+    relativeScrolling = false; // scroll the page relative to where we are now
+    scaleX = -3; // how fast to scroll with relative scrolling
+    scaleY = -3; // use negative values for "natural scrolling" (push the page)
     // END
 
     fScroll = ((reverse) ? fRevPos : fPos);
@@ -55,6 +59,8 @@ function rightMbDown(e) {
     if (e.which == mouseBtn) {
         if (!down) {
             down = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
             window.addEventListener("mousemove", waitScroll, false);
             if (!stopOnSecondClick)
                 window.addEventListener("mouseup", stop, false);
@@ -81,6 +87,15 @@ function scroll(e) {
         stop();
         return;
     }
+    if (relativeScrolling) {
+      var diffX = e.clientX - lastX;
+      var diffY = e.clientY - lastY;
+      window.scrollTo(window.scrollX + diffX * scaleX, window.scrollY + diffY * scaleY);
+      lastX = e.clientX;
+      lastY = e.clientY;
+      return;
+    }
+    // The original absolute scrolling
     window.scrollTo(
         fScrollX(
             window.innerWidth - scrollBarWidth,
