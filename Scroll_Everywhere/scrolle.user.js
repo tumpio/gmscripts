@@ -34,8 +34,8 @@ if (window.top === window.self) {
     startAnimDelay = 150; // slow scroll start mode animation delay
     cursorStyle = "grab"; // cursor style on scroll
     relativeScrolling = false; // scroll the page relative to where we are now
-    scaleX = -3; // how fast to scroll with relative scrolling
-    scaleY = -3; // use negative values for "natural scrolling" (push the page)
+    scaleX = 3; // how fast to scroll with relative scrolling
+    scaleY = 3;
     power = 3; // when moving the mouse faster, how quickly should it speed up?
     // END
 
@@ -93,7 +93,8 @@ function scroll(e) {
       var diffY = e.clientY - lastY;
       var distance = Math.sqrt(diffX * diffX + diffY * diffY);
       var velocity = 1 + distance * power / 100;
-      window.scrollTo(window.scrollX + diffX * scaleX * velocity, window.scrollY + diffY * scaleY * velocity);
+      var reverseScale = reverse ? -1 : 1;
+      window.scrollTo(window.scrollX + diffX * scaleX * velocity * reverseScale, window.scrollY + diffY * scaleY * velocity * reverseScale);
       lastX = e.clientX;
       lastY = e.clientY;
       return;
