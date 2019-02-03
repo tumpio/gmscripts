@@ -9,7 +9,7 @@
 // @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/Scroll_Everywhere/large.png
 // @include         *
 // @grant           none
-// @version         0.3b
+// @version         0.3c
 // ==/UserScript==
 
 /* jshint multistr: true, strict: false, browser: true, devel: true */
@@ -20,8 +20,11 @@
 // FUTURE: Options dialog
 
 var mouseBtn, reverse, stopOnSecondClick, verticalScroll, startAnimDelay, cursorStyle, down,
-    scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart,
-    lastX, lastY, scaleX, scaleY, power;
+    scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart;
+
+var middleIsStart, startX, startY, startScrollTop, startScrollLeft;
+
+var relativeScrolling, lastX, lastY, scaleX, scaleY, power, offsetMiddle;
 
 // NOTE: Do not run on iframes
 if (window.top === window.self) {
@@ -33,6 +36,7 @@ if (window.top === window.self) {
     slowScrollStart = false; // slow scroll start on begin
     startAnimDelay = 150; // slow scroll start mode animation delay
     cursorStyle = "grab"; // cursor style on scroll
+    middleIsStart = false; // don't jump when the mouse starts moving
     relativeScrolling = false; // scroll the page relative to where we are now
     scaleX = 3; // how fast to scroll with relative scrolling
     scaleY = 3;
@@ -60,6 +64,10 @@ function rightMbDown(e) {
     if (e.which == mouseBtn) {
         if (!down) {
             down = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startScrollTop = document.documentElement.scrollTop;
+            startScrollLeft = document.documentElement.scrollLeft;
             lastX = e.clientX;
             lastY = e.clientY;
             window.addEventListener("mousemove", waitScroll, false);
@@ -128,10 +136,24 @@ function noScrollX() {
 }
 
 function fPos(win, doc, pos) {
+    if (middleIsStart) {
+        if (pos < startY) {
+            return startScrollTop * pos / startY;
+        } else {
+            return startScrollTop + (doc - startScrollTop) * (pos - startY) / (win - startY);
+        }
+    }
     return doc * (pos / win);
 }
 
 function fRevPos(win, doc, pos) {
+    if (middleIsStart) {
+        if (pos < startY) {
+            return startScrollTop + (doc - startScrollTop) * (startY - pos) / startY;
+        } else {
+            return startScrollTop - startScrollTop * (pos - startY) / (win - startY);
+        }
+    }
     return doc - fPos(win, doc, pos);
 }
 
