@@ -70,6 +70,8 @@ function rightMbDown(e) {
             startScrollLeft = document.documentElement.scrollLeft;
             lastX = e.clientX;
             lastY = e.clientY;
+            if (!slowScrollStart)
+              scroll(e);
             window.addEventListener("mousemove", waitScroll, false);
             if (!stopOnSecondClick)
                 window.addEventListener("mouseup", stop, false);
