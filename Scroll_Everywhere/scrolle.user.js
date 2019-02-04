@@ -82,8 +82,11 @@ function setStartData(e) {
     lastScrollHeight = document.body.scrollHeight;
     startX = e.clientX;
     startY = e.clientY;
-    startScrollTop = document.documentElement.scrollTop;
-    startScrollLeft = document.documentElement.scrollLeft;
+    // On some pages, body.scrollTop changes whilst documentElement.scrollTop remains 0.
+    // For example: https://docs.kde.org/trunk5/en/kde-workspace/kcontrol/autostart/index.html
+    // See: https://stackoverflow.com/questions/19618545
+    startScrollTop = document.documentElement.scrollTop || document.body.scrollTop || 0;
+    startScrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft || 0;
 }
 
 function waitScroll(e) {
