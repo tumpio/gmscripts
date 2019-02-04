@@ -22,7 +22,7 @@
 var mouseBtn, reverse, stopOnSecondClick, verticalScroll, startAnimDelay, cursorStyle, down,
     scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart;
 
-var middleIsStart, startX, startY, startScrollTop, startScrollLeft;
+var middleIsStart, startX, startY, startScrollTop, startScrollLeft, lastScrollHeight;
 
 var relativeScrolling, lastX, lastY, scaleX, scaleY, power, offsetMiddle;
 
@@ -64,10 +64,7 @@ function rightMbDown(e) {
     if (e.which == mouseBtn) {
         if (!down) {
             down = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            startScrollTop = document.documentElement.scrollTop;
-            startScrollLeft = document.documentElement.scrollLeft;
+            setStartData(e);
             lastX = e.clientX;
             lastY = e.clientY;
             if (!slowScrollStart)
@@ -79,6 +76,14 @@ function rightMbDown(e) {
             stop();
         }
     }
+}
+
+function setStartData(e) {
+    lastScrollHeight = document.body.scrollHeight;
+    startX = e.clientX;
+    startY = e.clientY;
+    startScrollTop = document.documentElement.scrollTop;
+    startScrollLeft = document.documentElement.scrollLeft;
 }
 
 function waitScroll(e) {
@@ -93,6 +98,11 @@ function waitScroll(e) {
 }
 
 function scroll(e) {
+    // If the site has just changed the height of the webpage (e.g. by auto-loading more content)
+    // then we must adapt to the new height to avoid jumping.
+    if (lastScrollHeight !== document.body.scrollHeight) {
+        setStartData(e);
+    }
     //scrollevents += 1;
     if (!stopOnSecondClick && e.buttons === 0) {
         stop();
