@@ -79,7 +79,7 @@ function rightMbDown(e) {
 }
 
 function setStartData(e) {
-    lastScrollHeight = document.body.scrollHeight;
+    lastScrollHeight = getScrollHeight();
     startX = e.clientX;
     startY = e.clientY;
     // On some pages, body.scrollTop changes whilst documentElement.scrollTop remains 0.
@@ -103,7 +103,7 @@ function waitScroll(e) {
 function scroll(e) {
     // If the site has just changed the height of the webpage (e.g. by auto-loading more content)
     // then we must adapt to the new height to avoid jumping.
-    if (lastScrollHeight !== document.body.scrollHeight) {
+    if (lastScrollHeight !== getScrollHeight()) {
         setStartData(e);
     }
     //scrollevents += 1;
@@ -126,11 +126,11 @@ function scroll(e) {
     window.scrollTo(
         fScrollX(
             window.innerWidth - scrollBarWidth,
-            document.body.scrollWidth - window.innerWidth,
+            getScrollWidth() - window.innerWidth,
             e.clientX),
         fScrollY(
             window.innerHeight - scrollBarWidth,
-            document.body.scrollHeight - window.innerHeight,
+            getScrollHeight() - window.innerHeight,
             e.clientY)
     );
 }
@@ -170,6 +170,14 @@ function fRevPos(win, doc, pos) {
         }
     }
     return doc - fPos(win, doc, pos);
+}
+
+function getScrollHeight(e) {
+  return document.body.scrollHeight || document.documentElement.scrollHeight || 0;
+}
+
+function getScrollWidth(e) {
+  return document.body.scrollWidth || document.documentElement.scrollWidth || 0;
 }
 
 function getScrollBarWidth() {
