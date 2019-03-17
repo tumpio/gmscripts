@@ -24,6 +24,7 @@ const centerElement = "#center_col";
 const loadWindowSize = 1.6;
 const filtersAll = ["#foot", "#bottomads"];
 const filtersCol = filtersAll.concat(["#extrares", "#imagebox_bigimages"]);
+let   msg = "";
 
 const css = `
 .page-number {
@@ -40,7 +41,21 @@ const css = `
   height: 1px;
   width: 100%;
   margin: 1em 3em;
-}`;
+}
+.endless-msg {
+  position:fixed;
+  bottom:0;
+  left:0;
+  padding:5px 10px;
+  background: darkred;
+  color: white;
+  font-size: 11px;
+  display: none;
+}
+.endless-msg.shown {
+  display:block;
+}
+`;
 
 let pageNumber = 1;
 let prevScrollY = 0;
@@ -52,7 +67,7 @@ function requestNextPage() {
     if (!nextPage.searchParams.has("q")) return;
 
     nextPage.searchParams.set("start", String(pageNumber * 10));
-
+    !msg.classList.contains("shown") && msg.classList.add("shown");
     fetch(nextPage.href)
         .then(response => response.text())
         .then(text => {
@@ -76,11 +91,14 @@ function requestNextPage() {
             if (!content.querySelector("#ires")) {
                 // end of results
                 window.removeEventListener("scroll", onScrollDocumentEnd);
+                nextPageLoading = false;
+                msg.classList.contains("shown") && msg.classList.remove("shown");
                 return;
             }
 
             pageNumber++;
             nextPageLoading = false;
+            msg.classList.contains("shown") && msg.classList.remove("shown");
         });
 }
 
@@ -114,6 +132,10 @@ function init() {
     style.type = "text/css";
     style.appendChild(document.createTextNode(css));
     document.head.appendChild(style);
+    msg = document.createElement("div");
+    msg.setAttribute("class", "endless-msg");
+    msg.innerText = "Loading next page...";
+    document.body.appendChild(msg);
 }
 
 document.addEventListener("DOMContentLoaded", init);
