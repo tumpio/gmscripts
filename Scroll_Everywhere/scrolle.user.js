@@ -9,7 +9,7 @@
 // @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/Scroll_Everywhere/large.png
 // @include         *
 // @grant           none
-// @version         0.3a
+// @version         0.3c
 // ==/UserScript==
 
 /* jshint multistr: true, strict: false, browser: true, devel: true */
@@ -22,6 +22,10 @@
 var mouseBtn, reverse, stopOnSecondClick, verticalScroll, startAnimDelay, cursorStyle, down,
     scrollevents, scrollBarWidth, cursorMask, isWin, fScrollX, fScrollY, fScroll, slowScrollStart;
 
+var middleIsStart, startX, startY, startScrollTop, startScrollLeft, lastScrollHeight;
+
+var relativeScrolling, lastX, lastY, scaleX, scaleY, power, offsetMiddle;
+
 // NOTE: Do not run on iframes
 if (window.top === window.self) {
     // USER SETTINGS
@@ -32,6 +36,11 @@ if (window.top === window.self) {
     slowScrollStart = false; // slow scroll start on begin
     startAnimDelay = 150; // slow scroll start mode animation delay
     cursorStyle = "grab"; // cursor style on scroll
+    middleIsStart = false; // don't jump when the mouse starts moving
+    relativeScrolling = false; // scroll the page relative to where we are now
+    scaleX = 3; // how fast to scroll with relative scrolling
+    scaleY = 3;
+    power = 3; // when moving the mouse faster, how quickly should it speed up?
     // END
 
     fScroll = ((reverse) ? fRevPos : fPos);
@@ -55,6 +64,11 @@ function rightMbDown(e) {
     if (e.which == mouseBtn) {
         if (!down) {
             down = true;
+            setStartData(e);
+            lastX = e.clientX;
+            lastY = e.clientY;
+            if (!slowScrollStart)
+              scroll(e);
             window.addEventListener("mousemove", waitScroll, false);
             if (!stopOnSecondClick)
                 window.addEventListener("mouseup", stop, false);
@@ -62,6 +76,17 @@ function rightMbDown(e) {
             stop();
         }
     }
+}
+
+function setStartData(e) {
+    lastScrollHeight = getScrollHeight();
+    startX = e.clientX;
+    startY = e.clientY;
+    // On some pages, body.scrollTop changes whilst documentElement.scrollTop remains 0.
+    // For example: https://docs.kde.org/trunk5/en/kde-workspace/kcontrol/autostart/index.html
+    // See: https://stackoverflow.com/questions/19618545
+    startScrollTop = document.documentElement.scrollTop || document.body.scrollTop || 0;
+    startScrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft || 0;
 }
 
 function waitScroll(e) {
@@ -76,19 +101,36 @@ function waitScroll(e) {
 }
 
 function scroll(e) {
+    // If the site has just changed the height of the webpage (e.g. by auto-loading more content)
+    // then we must adapt to the new height to avoid jumping.
+    if (lastScrollHeight !== getScrollHeight()) {
+        setStartData(e);
+    }
     //scrollevents += 1;
     if (!stopOnSecondClick && e.buttons === 0) {
         stop();
         return;
     }
+    if (relativeScrolling) {
+      var diffX = e.clientX - lastX;
+      var diffY = e.clientY - lastY;
+      var distance = Math.sqrt(diffX * diffX + diffY * diffY);
+      var velocity = 1 + distance * power / 100;
+      var reverseScale = reverse ? -1 : 1;
+      window.scrollTo(window.scrollX + diffX * scaleX * velocity * reverseScale, window.scrollY + diffY * scaleY * velocity * reverseScale);
+      lastX = e.clientX;
+      lastY = e.clientY;
+      return;
+    }
+    // The original absolute scrolling
     window.scrollTo(
         fScrollX(
             window.innerWidth - scrollBarWidth,
-            document.body.scrollWidth - window.innerWidth,
+            getScrollWidth() - window.innerWidth,
             e.clientX),
         fScrollY(
             window.innerHeight - scrollBarWidth,
-            document.body.scrollHeight - window.innerHeight,
+            getScrollHeight() - window.innerHeight,
             e.clientY)
     );
 }
@@ -109,11 +151,33 @@ function noScrollX() {
 }
 
 function fPos(win, doc, pos) {
+    if (middleIsStart) {
+        if (pos < startY) {
+            return startScrollTop * pos / startY;
+        } else {
+            return startScrollTop + (doc - startScrollTop) * (pos - startY) / (win - startY);
+        }
+    }
     return doc * (pos / win);
 }
 
 function fRevPos(win, doc, pos) {
+    if (middleIsStart) {
+        if (pos < startY) {
+            return startScrollTop + (doc - startScrollTop) * (startY - pos) / startY;
+        } else {
+            return startScrollTop - startScrollTop * (pos - startY) / (win - startY);
+        }
+    }
     return doc - fPos(win, doc, pos);
+}
+
+function getScrollHeight(e) {
+  return document.body.scrollHeight || document.documentElement.scrollHeight || 0;
+}
+
+function getScrollWidth(e) {
+  return document.body.scrollWidth || document.documentElement.scrollWidth || 0;
 }
 
 function getScrollBarWidth() {
