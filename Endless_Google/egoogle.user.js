@@ -10,7 +10,7 @@
 // @include         https://www.google.*
 // @include         https://encrypted.google.*
 // @run-at          document-start
-// @version         0.0.5
+// @version         0.0.6
 // @license         MIT
 // @noframes
 // ==/UserScript==
@@ -88,7 +88,7 @@ function requestNextPage() {
             col.appendChild(content);
             document.querySelector(centerElement).appendChild(col);
 
-            if (!content.querySelector("#ires")) {
+            if (!content.querySelector("#rso")) {
                 // end of results
                 window.removeEventListener("scroll", onScrollDocumentEnd);
                 nextPageLoading = false;
