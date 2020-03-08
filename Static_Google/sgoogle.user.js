@@ -5,7 +5,6 @@
 // @namespace       tumpio@sci.fi
 // @homepageURL     https://openuserjs.org/scripts/tumpio/Static_Google
 // @supportURL      https://github.com/tumpio/gmscripts
-// @icon            https://raw.githubusercontent.com/tumpio/googlestatic/master/icon.svg
 // @resource        css https://raw.githubusercontent.com/tumpio/googlestatic/master/static-style.css
 // @include         http://www.google.*
 // @include         https://www.google.*
@@ -13,7 +12,8 @@
 // @noframes
 // @run-at          document-start
 // @grant           GM.getResourceUrl
-// @version         1.10.0
+// @version         1.10.1
+// @license         MIT
 // ==/UserScript==
 
 (async function() {
