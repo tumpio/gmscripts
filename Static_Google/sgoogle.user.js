@@ -11,14 +11,20 @@
 // @match           https://encrypted.google.com/*
 // @noframes
 // @run-at          document-start
+// @grant           GM_addStyle
+// @grant           GM_getResourceText
 // @grant           GM.getResourceUrl
-// @version         1.10.1
+// @version         1.10.2
 // @license         MIT
 // ==/UserScript==
 
-(async function() {
-    let link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = await GM.getResourceUrl("css");
-    document.head.appendChild(link);
-})();
+if (typeof GM_addStyle === "undefined") {
+  (async function() {
+      let link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = await GM.getResourceUrl("css");
+      document.head.appendChild(link);
+  })();
+} else {
+	GM_addStyle(GM_getResourceText('css'));
+}
