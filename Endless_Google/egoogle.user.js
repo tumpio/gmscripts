@@ -10,7 +10,7 @@
 // @include         https://www.google.*
 // @include         https://encrypted.google.*
 // @run-at          document-start
-// @version         0.0.6
+// @version         0.0.7
 // @license         MIT
 // @noframes
 // ==/UserScript==
@@ -77,6 +77,8 @@ function requestNextPage() {
 
             content.id = "col_" + pageNumber;
             filter(content, filtersCol);
+
+            content.style.marginLeft = '0';
 
             let pageMarker = document.createElement("div");
             pageMarker.textContent = String(pageNumber + 1);
