@@ -9,7 +9,7 @@
 // @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/Scroll_Everywhere/large.png
 // @include         *
 // @grant           none
-// @version         0.3c
+// @version         0.3d
 // ==/UserScript==
 
 /* jshint multistr: true, strict: false, browser: true, devel: true */
@@ -181,13 +181,20 @@ function getScrollWidth(e) {
 }
 
 function getScrollBarWidth() {
-    var style = document.body.style.overflow;
+    var originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     var width = document.body.clientWidth;
     document.body.style.overflow = 'scroll';
     width -= document.body.clientWidth;
     if (!width) width = document.body.offsetWidth - document.body.clientWidth;
-    document.body.style.overflow = style;
+
+    // Now we set overflow back to how it was
+    // But if style === '' then Firefox will sometimes leave the temporary scrollbar still showing!
+    // We can prevent that by setting it to 'initial', and forcing a relayout, before setting it to ''
+    document.body.style.overflow = originalOverflow || 'initial';
+    var triggerLayout = document.body.clientWidth;
+    document.body.style.overflow = originalOverflow;
+
     return width;
 }
 
