@@ -115,7 +115,7 @@ function longPressDetected() {
                 border-radius: 50%;
                 transform: scale(0);
                 animation: ripple 600ms ease-out;
-                background-color: #8886;
+                background-color: #aaa8;
                 z-index: 999999;
                 pointer-events: none;
             }
