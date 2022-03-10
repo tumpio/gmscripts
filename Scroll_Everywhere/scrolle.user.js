@@ -9,7 +9,8 @@
 // @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/Scroll_Everywhere/large.png
 // @include         *
 // @grant           none
-// @version         0.3d
+// @run-at          document-body
+// @version         0.3i
 // ==/UserScript==
 
 /* jshint multistr: true, strict: false, browser: true, devel: true */
