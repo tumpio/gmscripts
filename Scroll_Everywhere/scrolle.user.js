@@ -3,6 +3,7 @@
 // @description     Scroll everywhere with right mouse button.
 // @author          tumpio
 // @oujs:author     tumpio
+// @contributor     joeytwiddle
 // @namespace       tumpio@sci.fi
 // @homepageURL     https://openuserjs.org/scripts/tumpio/Scroll_Everywhere
 // @supportURL      https://github.com/tumpio/gmscripts
@@ -26,6 +27,8 @@ var mouseBtn, reverse, stopOnSecondClick, verticalScroll, startAnimDelay, cursor
 var middleIsStart, startX, startY, startScrollTop, startScrollLeft, lastScrollHeight;
 
 var relativeScrolling, lastX, lastY, scaleX, scaleY, power, offsetMiddle;
+
+var lastMiddleClickTime;
 
 var startAfterLongPress, longPressTimer, eventBeforeLongPress, longPressStylesAdded;
 
@@ -66,6 +69,7 @@ if (window.top === window.self) {
     window.addEventListener("mousedown", handleMouseDown, false);
     window.addEventListener("mouseup", handleMouseUp, false);
     window.addEventListener("click", handleClick, true);
+    window.addEventListener('paste', handlePaste, true);
 }
 
 function handleMouseDown(e) {
@@ -89,6 +93,9 @@ function handleMouseDown(e) {
 }
 
 function handleMouseUp(e) {
+    if (e.which == 2) {
+        lastMiddleClickTime = Date.now();
+    }
     if (startAfterLongPress) {
         cancelLongPress();
     }
@@ -105,6 +112,27 @@ function handleClick(e) {
         e.stopPropagation();
     }
 }
+
+function handlePaste(e) {
+    var timeSinceLastMiddleClick = Date.now() - lastMiddleClickTime;
+    //console.log("Pasting (" + timeSinceLastMiddleClick + "ms):", (event.clipboardData || window.clipboardData).getData('text'));
+
+    // If you use middle button for scrolling on Linux, then you might be sending a paste event every time you use this scroller.
+    // Depending on the contents of your clipboard, that could be a privacy leak!
+    // Therefore we disable paste events if they come after a middle click (if the user uses middle click for scrolling).
+    //
+    // Note this solution is still not entirely safe.  There could be an event listener registered before us, which would see the paste.
+    // Another option is to disable middle-click but this also isn't trivial to do universally: https://askubuntu.com/questions/4507
+    //
+    // TODO: It would be better to check if this was a middle-click drag (i.e. a scroll).  A plain short middle-click we could interpret as a paste.
+
+    if (mouseBtn == 2 && timeSinceLastMiddleClick < 200) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+}
+
 function startLongPress(e) {
     cancelLongPress();
     eventBeforeLongPress = e;
