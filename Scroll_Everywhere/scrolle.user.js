@@ -17,6 +17,10 @@
 /* jshint multistr: true, strict: false, browser: true, devel: true */
 /* global escape: true,GM_getValue: true,GM_setValue: true,GM_addStyle: true,GM_xmlhttpRequest: true */
 
+/* eslint-disable eqeqeq */
+/* eslint-disable curly */
+/* eslint-disable no-redeclare */
+
 // TODO: add slow scroll start mode
 // FIXME: Linux/mac context menu on mousedown, probably needs browser level
 // FUTURE: Options dialog
@@ -59,7 +63,7 @@ if (window.top === window.self) {
     scrollevents = 0;
     scrollBarWidth = 2 * getScrollBarWidth();
     cursorMask = document.createElement('div');
-    isWin = (window.navigator.appVersion.indexOf("Win") != -1 ? true : false);
+    isWin = window.navigator.appVersion.indexOf("Win") >= 0;
     if (cursorStyle === "grab")
         cursorStyle = "-webkit-grabbing; cursor: -moz-grabbing";
     cursorMask.id = "SE_cursorMask_cursor";
@@ -338,7 +342,7 @@ function slowF(x) {
 }
 
 function selectNoText() {
-	if (document.body.createTextRange) {
+    if (document.body.createTextRange) {
         const range = document.body.createTextRange();
         range.select();
     } else if (window.getSelection) {
