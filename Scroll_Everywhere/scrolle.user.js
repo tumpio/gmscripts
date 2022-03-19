@@ -11,7 +11,7 @@
 // @include         *
 // @grant           GM_addStyle
 // @run-at          document-body
-// @version         0.3m
+// @version         0.3o
 // ==/UserScript==
 
 /* jshint multistr: true, strict: false, browser: true, devel: true */
@@ -37,6 +37,8 @@ var lastMiddleClickTime;
 var startAfterLongPress, longPressTimer, eventBeforeLongPress, longPressStylesAdded;
 
 var scrollStartTime, scrollStopTime;
+
+var elementToScroll;
 
 // NOTE: Do not run on iframes
 if (window.top === window.self) {
@@ -78,9 +80,9 @@ if (window.top === window.self) {
 
 function handleMouseDown(e) {
     // From: https://stackoverflow.com/questions/10045423/determine-whether-user-clicking-scrollbar-or-content-onclick-for-native-scroll
-    var wasClickOnScrollbar = e.offsetX > e.target.clientWidth || e.offsetY > e.target.clientHeight;
+    var wasClickOnScrollbar = e.target.clientWidth > 0 && e.offsetX > e.target.clientWidth || e.target.clientHeight > 0 && e.offsetY > e.target.clientHeight;
     if (wasClickOnScrollbar) {
-        //console.log('Ignoring click on scrollbar:', e);
+        //console.log('Ignoring click on scrollbar:', e, `${e.offsetX} > ${e.target.clientWidth} || ${e.offsetY} > ${e.target.clientHeight}`);
         return;
     }
     if (e.which == mouseBtn) {
@@ -201,6 +203,8 @@ function cancelLongPress() {
 
 function start(e) {
     down = true;
+    elementToScroll = findElementToScroll(e.target);
+    //console.log('Will do scrolling on:', elementToScroll, elementToScroll.scrollTop, elementToScroll.scrollHeight, getComputedStyle(elementToScroll).overflow);
     scrollStartTime = Date.now();
     setStartData(e);
     lastX = e.clientX;
@@ -212,6 +216,21 @@ function start(e) {
         window.addEventListener("mouseup", stop, false);
 }
 
+function findElementToScroll(elem) {
+    if (elem.clientHeight > 0 && elem.scrollHeight > elem.clientHeight) {
+        var overflow = getComputedStyle(elem).overflow;
+        if (overflow === '' || overflow.match(/(auto|scroll|overlay)/)) {
+            //console.log('overflow:', overflow);
+            return elem;
+        }
+    }
+    if (!elem.parentNode) {
+        // On some sites, documentElement works better than body
+        return document.documentElement.scrollHeight > 0 ? document.documentElement : document.body;
+    }
+    return findElementToScroll(elem.parentNode);
+}
+
 function setStartData(e) {
     lastScrollHeight = getScrollHeight();
     startX = e.clientX;
@@ -219,8 +238,12 @@ function setStartData(e) {
     // On some pages, body.scrollTop changes whilst documentElement.scrollTop remains 0.
     // For example: https://docs.kde.org/trunk5/en/kde-workspace/kcontrol/autostart/index.html
     // See: https://stackoverflow.com/questions/19618545
-    startScrollTop = document.documentElement.scrollTop || document.body.scrollTop || 0;
-    startScrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+    startScrollTop = elementToScroll.scrollTop || 0;
+    startScrollLeft = elementToScroll.scrollLeft || 0;
+    if (elementToScroll === document.documentElement || elementToScroll === document.body) {
+        startScrollTop = document.documentElement.scrollTop || document.body.scrollTop || 0;
+        startScrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+    }
 }
 
 function waitScroll(e) {
@@ -251,22 +274,37 @@ function scroll(e) {
       var distance = Math.sqrt(diffX * diffX + diffY * diffY);
       var velocity = 1 + distance * power / 100;
       var reverseScale = reverse ? -1 : 1;
-      window.scrollTo(window.scrollX + diffX * scaleX * velocity * reverseScale, window.scrollY + diffY * scaleY * velocity * reverseScale);
+      //doScrollTo(window, window.scrollX + diffX * scaleX * velocity * reverseScale, window.scrollY + diffY * scaleY * velocity * reverseScale);
+      doScrollTo(elementToScroll, elementToScroll.scrollLeft + diffX * scaleX * velocity * reverseScale, elementToScroll.scrollTop + diffY * scaleY * velocity * reverseScale);
       lastX = e.clientX;
       lastY = e.clientY;
       return;
     }
-    // The original absolute scrolling
-    window.scrollTo(
-        fScrollX(
-            window.innerWidth - scrollBarWidth,
-            getScrollWidth() - window.innerWidth,
-            e.clientX),
-        fScrollY(
-            window.innerHeight - scrollBarWidth,
-            getScrollHeight() - window.innerHeight,
-            e.clientY)
-    );
+    var newX = fScrollX(
+        window.innerWidth - scrollBarWidth,
+        getScrollWidth() - getClientWidth(),
+        e.clientX);
+    var newY = fScrollY(
+        window.innerHeight - scrollBarWidth,
+        getScrollHeight() - getClientHeight(),
+        e.clientY);
+    doScrollTo(elementToScroll, newX, newY);
+}
+
+function doScrollTo(elem, x, y) {
+    //console.log(`Doing scroll: ${x} ${y}`);
+    // For normal HTML elements
+    elem.scrollTo(x, y);
+    // For React Native elements
+    elem.scrollTo({ x: x, y: y, animated: false });
+    if (elem === document.documentElement) {
+        document.body.scrollTo(x, y);
+        document.body.scrollTo({ x: x, y: y, animated: false });
+    }
+    if (elem === document.body) {
+        document.documentElement.scrollTo(x, y);
+        document.documentElement.scrollTo({ x: x, y: y, animated: false });
+    }
 }
 
 function stop() {
@@ -282,7 +320,7 @@ function stop() {
 }
 
 function noScrollX() {
-    return document.documentElement.scrollLeft;
+    return elementToScroll.scrollLeft;
 }
 
 function fPos(win, doc, pos) {
@@ -307,12 +345,27 @@ function fRevPos(win, doc, pos) {
     return doc - fPos(win, doc, pos);
 }
 
-function getScrollHeight(e) {
-  return document.body.scrollHeight || document.documentElement.scrollHeight || 0;
+function getScrollHeight() {
+    return elementToScroll.scrollHeight || 0;
 }
 
-function getScrollWidth(e) {
-  return document.body.scrollWidth || document.documentElement.scrollWidth || 0;
+function getScrollWidth() {
+  return elementToScroll.scrollWidth || 0;
+}
+
+function getClientHeight(e) {
+    // Sometimes documentElement will return the full scrollHeight, but we want the smaller visible portal that body returns
+    if (elementToScroll === document.documentElement || elementToScroll === document.body) {
+        return Math.min(document.documentElement.clientHeight, document.body.clientHeight);
+    }
+    return elementToScroll.clientHeight || 0;
+}
+
+function getClientWidth(e) {
+    if (elementToScroll === document.documentElement || elementToScroll === document.body) {
+        return Math.min(document.documentElement.clientWidth, document.body.clientWidth);
+    }
+    return elementToScroll.clientWidth || 0;
 }
 
 function getScrollBarWidth() {
