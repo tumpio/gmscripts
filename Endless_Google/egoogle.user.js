@@ -73,7 +73,8 @@ function requestNextPage() {
         .then(text => {
             let parser = new DOMParser();
             let htmlDocument = parser.parseFromString(text, "text/html");
-            let content = htmlDocument.documentElement.querySelector(centerElement);
+            let docElement = htmlDocument.documentElement;
+            let content = docElement.querySelector(centerElement);
 
             content.id = "col_" + pageNumber;
             filter(content, filtersCol);
@@ -87,6 +88,23 @@ function requestNextPage() {
             let col = document.createElement("div");
             col.className = "next-col";
             col.appendChild(pageMarker);
+
+            try {
+                let thumbnails = text.match(/google\.ldi=({.+?})/);
+                let thumbnailsObj = JSON.parse(thumbnails && thumbnails[1]);
+                for (let id in thumbnailsObj) {
+                    docElement.querySelector("#"+id).src = unescapeHex(thumbnailsObj[id]);
+                }
+            } catch(e) {}
+
+            docElement.querySelectorAll('g-img img[id]').forEach(({id}) => {
+                let pattern = new RegExp("var\\ss='(\\S+)';var\\sii=\\['"+id+"'\\];");
+                let imageSource = text.match(pattern);
+                if (imageSource != null && imageSource[1]) {
+                    docElement.querySelector("#"+id).src = unescapeHex(imageSource[1]);
+                }
+            });
+
             col.appendChild(content);
             document.querySelector(centerElement).appendChild(col);
 
@@ -102,6 +120,12 @@ function requestNextPage() {
             nextPageLoading = false;
             msg.classList.contains("shown") && msg.classList.remove("shown");
         });
+}
+
+function unescapeHex(hex) {
+    return hex.replace(/\\x([0-9a-f]{2})/ig, function(_, chunk) {
+        return String.fromCharCode(parseInt(chunk, 16));
+    });
 }
 
 function onScrollDocumentEnd() {
