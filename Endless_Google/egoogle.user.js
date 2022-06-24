@@ -98,7 +98,7 @@ function requestNextPage() {
             } catch(e) {}
 
             docElement.querySelectorAll('g-img img[id]').forEach(({id}) => {
-                let pattern = new RegExp("var\\ss='(\\S+)';var\\sii=\\['"+id+"'\\];");
+                let pattern = new RegExp("var\\ss='(\\S+)';var\\sii=\\[[a-z0-9_',]*?'"+id+"'[a-z0-9_',]*?\\];");
                 let imageSource = text.match(pattern);
                 if (imageSource != null && imageSource[1]) {
                     docElement.querySelector("#"+id).src = unescapeHex(imageSource[1]);
