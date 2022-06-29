@@ -89,6 +89,7 @@ function requestNextPage() {
             col.className = "next-col";
             col.appendChild(pageMarker);
 
+            // Set images source address
             try {
                 let thumbnails = text.match(/google\.ldi=({.+?})/);
                 let thumbnailsObj = JSON.parse(thumbnails && thumbnails[1]);
@@ -97,12 +98,19 @@ function requestNextPage() {
                 }
             } catch(e) {}
 
-            docElement.querySelectorAll('g-img img[id]').forEach(({id}) => {
+            function setImagesSrc({id}) {
                 let pattern = new RegExp("var\\ss='(\\S+)';var\\sii=\\[[a-z0-9_',]*?'"+id+"'[a-z0-9_',]*?\\];");
                 let imageSource = text.match(pattern);
                 if (imageSource != null && imageSource[1]) {
                     docElement.querySelector("#"+id).src = unescapeHex(imageSource[1]);
                 }
+            }
+            docElement.querySelectorAll('g-img > img[id]').forEach(setImagesSrc);
+            docElement.querySelectorAll('div > img[id^=dimg_]').forEach(setImagesSrc);
+
+            docElement.querySelectorAll('img[data-src]').forEach((img) => {
+                img.src = img.dataset.src;
+                img.style.visibility = 'visible';
             });
 
             col.appendChild(content);
@@ -123,6 +131,7 @@ function requestNextPage() {
 }
 
 function unescapeHex(hex) {
+    if (typeof hex != "string") { return ""; }
     return hex.replace(/\\x([0-9a-f]{2})/ig, function(_, chunk) {
         return String.fromCharCode(parseInt(chunk, 16));
     });
