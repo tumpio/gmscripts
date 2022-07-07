@@ -10,7 +10,7 @@
 // @include         https://www.google.*
 // @include         https://encrypted.google.*
 // @run-at          document-start
-// @version         0.0.7
+// @version         0.0.8
 // @license         MIT
 // @noframes
 // ==/UserScript==
