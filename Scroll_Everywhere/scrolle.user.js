@@ -3,17 +3,23 @@
 // @description     Scroll everywhere with right mouse button.
 // @author          tumpio
 // @oujs:author     tumpio
+// @contributor     joeytwiddle
 // @namespace       tumpio@sci.fi
 // @homepageURL     https://openuserjs.org/scripts/tumpio/Scroll_Everywhere
 // @supportURL      https://github.com/tumpio/gmscripts
 // @icon            https://raw.githubusercontent.com/tumpio/gmscripts/master/Scroll_Everywhere/large.png
 // @include         *
-// @grant           none
-// @version         0.3d
+// @grant           GM_addStyle
+// @run-at          document-body
+// @version         0.3o
 // ==/UserScript==
 
 /* jshint multistr: true, strict: false, browser: true, devel: true */
 /* global escape: true,GM_getValue: true,GM_setValue: true,GM_addStyle: true,GM_xmlhttpRequest: true */
+
+/* eslint-disable eqeqeq */
+/* eslint-disable curly */
+/* eslint-disable no-redeclare */
 
 // TODO: add slow scroll start mode
 // FIXME: Linux/mac context menu on mousedown, probably needs browser level
@@ -26,10 +32,19 @@ var middleIsStart, startX, startY, startScrollTop, startScrollLeft, lastScrollHe
 
 var relativeScrolling, lastX, lastY, scaleX, scaleY, power, offsetMiddle;
 
+var lastMiddleClickTime;
+
+var startAfterLongPress, longPressTimer, eventBeforeLongPress, longPressStylesAdded;
+
+var scrollStartTime, scrollStopTime;
+
+var elementToScroll;
+
 // NOTE: Do not run on iframes
 if (window.top === window.self) {
     // USER SETTINGS
     mouseBtn = 3; // 1:left, 2:middle, 3:right mouse button
+    startAfterLongPress = false; // Only start scrolling after a long click
     reverse = false; // reversed scroll direction
     stopOnSecondClick = false; // keep scrolling until the left mouse button clicked
     verticalScroll = false; // vertical scrolling
@@ -50,32 +65,170 @@ if (window.top === window.self) {
     scrollevents = 0;
     scrollBarWidth = 2 * getScrollBarWidth();
     cursorMask = document.createElement('div');
-    isWin = (window.navigator.appVersion.indexOf("Win") != -1 ? true : false);
+    isWin = window.navigator.appVersion.indexOf("Win") >= 0;
     if (cursorStyle === "grab")
         cursorStyle = "-webkit-grabbing; cursor: -moz-grabbing";
     cursorMask.id = "SE_cursorMask_cursor";
     cursorMask.setAttribute("style", "position: fixed; width: 100%; height: 100%; zindex: 5000; top: 0px; left: 0px; cursor: " + cursorStyle + "; background: none; display: none;");
     document.body.appendChild(cursorMask);
 
-    window.addEventListener("mousedown", rightMbDown, false);
+    window.addEventListener("mousedown", handleMouseDown, false);
+    window.addEventListener("mouseup", handleMouseUp, false);
+    window.addEventListener("click", handleClick, true);
+    window.addEventListener('paste', handlePaste, true);
 }
 
-function rightMbDown(e) {
+function handleMouseDown(e) {
+    // From: https://stackoverflow.com/questions/10045423/determine-whether-user-clicking-scrollbar-or-content-onclick-for-native-scroll
+    var wasClickOnScrollbar = e.target.clientWidth > 0 && e.offsetX > e.target.clientWidth || e.target.clientHeight > 0 && e.offsetY > e.target.clientHeight;
+    if (wasClickOnScrollbar) {
+        //console.log('Ignoring click on scrollbar:', e, `${e.offsetX} > ${e.target.clientWidth} || ${e.offsetY} > ${e.target.clientHeight}`);
+        return;
+    }
     if (e.which == mouseBtn) {
-        if (!down) {
-            down = true;
-            setStartData(e);
-            lastX = e.clientX;
-            lastY = e.clientY;
-            if (!slowScrollStart)
-              scroll(e);
-            window.addEventListener("mousemove", waitScroll, false);
-            if (!stopOnSecondClick)
-                window.addEventListener("mouseup", stop, false);
+        if (startAfterLongPress) {
+            startLongPress(e);
         } else {
-            stop();
+            if (!down) {
+                start(e);
+            } else {
+                stop();
+            }
         }
     }
+}
+
+function handleMouseUp(e) {
+    if (e.which == 2) {
+        lastMiddleClickTime = Date.now();
+    }
+    if (startAfterLongPress) {
+        cancelLongPress();
+    }
+}
+
+function handleClick(e) {
+    // If we were just in scrolling mode, then we don't want other listeners to see this click event
+    var justStoppedScrolling = Date.now() <= scrollStopTime + 20;
+    // But if we went in and out of scrolling mode in a short time, then this was actually a click
+    var wasShortClick = !startAfterLongPress && scrollStopTime - scrollStartTime < 200;
+    if (justStoppedScrolling && !wasShortClick) {
+        //console.info("MUTING click event");
+        e.preventDefault();
+        e.stopPropagation();
+    }
+}
+
+function handlePaste(e) {
+    var timeSinceLastMiddleClick = Date.now() - lastMiddleClickTime;
+    //console.log("Pasting (" + timeSinceLastMiddleClick + "ms):", (event.clipboardData || window.clipboardData).getData('text'));
+
+    // If you use middle button for scrolling on Linux, then you might be sending a paste event every time you use this scroller.
+    // Depending on the contents of your clipboard, that could be a privacy leak!
+    // Therefore we disable paste events if they come after a middle click (if the user uses middle click for scrolling).
+    //
+    // Note this solution is still not entirely safe.  There could be an event listener registered before us, which would see the paste.
+    // Another option is to disable middle-click but this also isn't trivial to do universally: https://askubuntu.com/questions/4507
+    //
+    // TODO: It would be better to check if this was a middle-click drag (i.e. a scroll).  A plain short middle-click we could interpret as a paste.
+
+    if (mouseBtn == 2 && timeSinceLastMiddleClick < 200) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }
+}
+
+function startLongPress(e) {
+    cancelLongPress();
+    eventBeforeLongPress = e;
+    longPressTimer = setTimeout(longPressDetected, 500);
+    window.addEventListener("mousemove", cancelLongPress, false);
+}
+
+function longPressDetected() {
+    // Cleanup
+    cancelLongPress();
+    if (mouseBtn == 1) {
+        // After a long press with the left mouse button, the browser will start selecting text, which will get messy when we scroll
+        // So we try to cancel that selection
+        selectNoText();
+    }
+    start(eventBeforeLongPress);
+    // Give the user a visual indication that scrolling mode has started
+    cursorMask.style.display = "";
+    // A stronger indication: a ripple effect starting from the mouse location
+    // This is especially useful when our pointer change is overriden by the page's CSS
+    // Based on: https://css-tricks.com/how-to-recreate-the-ripple-effect-of-material-design-buttons/
+    if (!longPressStylesAdded) {
+        GM_addStyle(`
+            #scroll-anywhere-ripple-animation {
+                position: fixed;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 600ms ease-out;
+                background-color: #aaa8;
+                z-index: 999999;
+                pointer-events: none;
+            }
+            @keyframes ripple {
+                from {
+                    transform: scale(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: scale(16);
+                    opacity: 0;
+                }
+            }
+        `);
+        longPressStylesAdded = true;
+    }
+    var circleDiv = document.createElement('div');
+    circleDiv.id = 'scroll-anywhere-ripple-animation';
+    circleDiv.style.left = (eventBeforeLongPress.clientX - 10) + 'px';
+    circleDiv.style.top = (eventBeforeLongPress.clientY - 10) + 'px';
+    document.body.appendChild(circleDiv);
+    setTimeout(() => {
+        circleDiv.parentNode.removeChild(circleDiv);
+    }, 2000);
+}
+
+function cancelLongPress() {
+    clearTimeout(longPressTimer);
+    window.removeEventListener("mousemove", cancelLongPress);
+}
+
+function start(e) {
+    down = true;
+    elementToScroll = findElementToScroll(e.target);
+    //console.log('Will do scrolling on:', elementToScroll, elementToScroll.scrollTop, elementToScroll.scrollHeight, getComputedStyle(elementToScroll).overflow);
+    scrollStartTime = Date.now();
+    setStartData(e);
+    lastX = e.clientX;
+    lastY = e.clientY;
+    if (!slowScrollStart)
+        scroll(e);
+    window.addEventListener("mousemove", waitScroll, false);
+    if (!stopOnSecondClick)
+        window.addEventListener("mouseup", stop, false);
+}
+
+function findElementToScroll(elem) {
+    if (elem.clientHeight > 0 && elem.scrollHeight > elem.clientHeight) {
+        var overflow = getComputedStyle(elem).overflow;
+        if (overflow === '' || overflow.match(/(auto|scroll|overlay)/)) {
+            //console.log('overflow:', overflow);
+            return elem;
+        }
+    }
+    if (!elem.parentNode) {
+        // On some sites, documentElement works better than body
+        return document.documentElement.scrollHeight > 0 ? document.documentElement : document.body;
+    }
+    return findElementToScroll(elem.parentNode);
 }
 
 function setStartData(e) {
@@ -85,8 +238,12 @@ function setStartData(e) {
     // On some pages, body.scrollTop changes whilst documentElement.scrollTop remains 0.
     // For example: https://docs.kde.org/trunk5/en/kde-workspace/kcontrol/autostart/index.html
     // See: https://stackoverflow.com/questions/19618545
-    startScrollTop = document.documentElement.scrollTop || document.body.scrollTop || 0;
-    startScrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+    startScrollTop = elementToScroll.scrollTop || 0;
+    startScrollLeft = elementToScroll.scrollLeft || 0;
+    if (elementToScroll === document.documentElement || elementToScroll === document.body) {
+        startScrollTop = document.documentElement.scrollTop || document.body.scrollTop || 0;
+        startScrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+    }
 }
 
 function waitScroll(e) {
@@ -117,22 +274,37 @@ function scroll(e) {
       var distance = Math.sqrt(diffX * diffX + diffY * diffY);
       var velocity = 1 + distance * power / 100;
       var reverseScale = reverse ? -1 : 1;
-      window.scrollTo(window.scrollX + diffX * scaleX * velocity * reverseScale, window.scrollY + diffY * scaleY * velocity * reverseScale);
+      //doScrollTo(window, window.scrollX + diffX * scaleX * velocity * reverseScale, window.scrollY + diffY * scaleY * velocity * reverseScale);
+      doScrollTo(elementToScroll, elementToScroll.scrollLeft + diffX * scaleX * velocity * reverseScale, elementToScroll.scrollTop + diffY * scaleY * velocity * reverseScale);
       lastX = e.clientX;
       lastY = e.clientY;
       return;
     }
-    // The original absolute scrolling
-    window.scrollTo(
-        fScrollX(
-            window.innerWidth - scrollBarWidth,
-            getScrollWidth() - window.innerWidth,
-            e.clientX),
-        fScrollY(
-            window.innerHeight - scrollBarWidth,
-            getScrollHeight() - window.innerHeight,
-            e.clientY)
-    );
+    var newX = fScrollX(
+        window.innerWidth - scrollBarWidth,
+        getScrollWidth() - getClientWidth(),
+        e.clientX);
+    var newY = fScrollY(
+        window.innerHeight - scrollBarWidth,
+        getScrollHeight() - getClientHeight(),
+        e.clientY);
+    doScrollTo(elementToScroll, newX, newY);
+}
+
+function doScrollTo(elem, x, y) {
+    //console.log(`Doing scroll: ${x} ${y}`);
+    // For normal HTML elements
+    elem.scrollTo(x, y);
+    // For React Native elements
+    elem.scrollTo({ x: x, y: y, animated: false });
+    if (elem === document.documentElement) {
+        document.body.scrollTo(x, y);
+        document.body.scrollTo({ x: x, y: y, animated: false });
+    }
+    if (elem === document.body) {
+        document.documentElement.scrollTo(x, y);
+        document.documentElement.scrollTo({ x: x, y: y, animated: false });
+    }
 }
 
 function stop() {
@@ -140,6 +312,7 @@ function stop() {
     if (isWin)
         document.oncontextmenu = !fFalse;
     down = false;
+    scrollStopTime = Date.now();
     scrollevents = 0;
     window.removeEventListener("mouseup", stop, false);
     window.removeEventListener("mousemove", scroll, false);
@@ -147,7 +320,7 @@ function stop() {
 }
 
 function noScrollX() {
-    return document.documentElement.scrollLeft;
+    return elementToScroll.scrollLeft;
 }
 
 function fPos(win, doc, pos) {
@@ -172,12 +345,27 @@ function fRevPos(win, doc, pos) {
     return doc - fPos(win, doc, pos);
 }
 
-function getScrollHeight(e) {
-  return document.body.scrollHeight || document.documentElement.scrollHeight || 0;
+function getScrollHeight() {
+    return elementToScroll.scrollHeight || 0;
 }
 
-function getScrollWidth(e) {
-  return document.body.scrollWidth || document.documentElement.scrollWidth || 0;
+function getScrollWidth() {
+  return elementToScroll.scrollWidth || 0;
+}
+
+function getClientHeight(e) {
+    // Sometimes documentElement will return the full scrollHeight, but we want the smaller visible portal that body returns
+    if (elementToScroll === document.documentElement || elementToScroll === document.body) {
+        return Math.min(document.documentElement.clientHeight, document.body.clientHeight);
+    }
+    return elementToScroll.clientHeight || 0;
+}
+
+function getClientWidth(e) {
+    if (elementToScroll === document.documentElement || elementToScroll === document.body) {
+        return Math.min(document.documentElement.clientWidth, document.body.clientWidth);
+    }
+    return elementToScroll.clientWidth || 0;
 }
 
 function getScrollBarWidth() {
@@ -204,4 +392,17 @@ function fFalse() {
 
 function slowF(x) {
     return 1 / (1 + Math.pow(Math.E, (-0.1 * x)));
+}
+
+function selectNoText() {
+    if (document.body.createTextRange) {
+        const range = document.body.createTextRange();
+        range.select();
+    } else if (window.getSelection) {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        selection.removeAllRanges();
+    } else {
+        console.warn("Could not unselect text: Unsupported browser.");
+    }
 }
